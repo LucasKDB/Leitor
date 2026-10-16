@@ -37,13 +37,13 @@ body[data-theme="oled"]{--bg:#000;--surface:#0d0d0f;--surface2:#1a1a1e;--text:#f
 <section class="view" id="editorView">
   <div class="eyebrow">Importar e traduzir</div><h1>Preparar capítulo</h1><p class="muted">Cole o texto do Royal Road, traduza e salve na sua biblioteca.</p>
   <section class="panel"><div class="form-grid">
-    <div class="field full"><label for="seriesName">Nome da novel / série</label><input id="seriesName" placeholder="Ex.: The Wandering Inn"><p class="term-hint">Use o mesmo nome nos capítulos da mesma novel. O leitor identifica nomes próprios automaticamente e reaproveita os termos encontrados nos capítulos salvos.</p></div>
+    <div class="field full"><label for="seriesName">Nome da novel / série</label><input id="seriesName" placeholder="Ex.: The Wandering Inn"><p class="term-hint">Use o mesmo nome nos capítulos da mesma novel. O leitor tenta identificar nomes próprios com regras conservadoras e reaproveita os termos dos capítulos salvos; confira os resultados e use o glossário manual para exceções.</p></div>
     <div class="field"><label for="chapterTitle">Nome do capítulo</label><input id="chapterTitle" placeholder="Ex.: Capítulo 12 — A chegada"></div>
     <div class="field"><label for="chapterUrl">Link original (opcional)</label><input id="chapterUrl" type="url" placeholder="https://www.royalroad.com/..." inputmode="url"></div>
     <div class="field full"><label for="source">Texto original em inglês</label><textarea id="source" placeholder="Cole aqui o texto do capítulo..." spellcheck="false"></textarea><p class="hint" id="sourceCount">0 caracteres</p></div>
-    <div class="field full"><label for="preserveTerms">Termos extras para preservar (opcional)</label><input id="preserveTerms" placeholder="Ex.: Shadow Realm, mana, Ironfang"><p class="term-hint">Não precisa cadastrar nomes próprios: o leitor tenta identificá-los automaticamente e reaproveitá-los entre capítulos da mesma novel. Use este campo apenas para termos especiais que queira manter exatamente como estão, separados por vírgulas.</p></div>
-    <div class="field full"><label for="translatorEmail">E-mail para cota maior do MyMemory (opcional)</label><input id="translatorEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"><p class="term-hint">Opcional. Um e-mail válido pode aumentar a cota do MyMemory, mas não elimina todos os limites. Se MyMemory bloquear a solicitação, o leitor tenta uma alternativa pública do Google Tradutor, que também pode ter limites e não oferece garantia de disponibilidade. O e-mail é enviado ao MyMemory; deixe em branco se preferir não compartilhá-lo.</p></div>
-  </div><div class="actions"><button id="translateBtn">Traduzir capítulo inteiro</button><button id="progressiveBtn" class="secondary">Traduzir conforme leio</button><button id="saveBtn" class="secondary">Salvar capítulo</button><button id="clearEditor" class="quiet">Limpar campos</button></div><div class="translation-progress" id="translationProgress"><div id="translationProgressFill"></div></div><p id="status" class="status" role="status" aria-live="polite"></p><div class="actions"><button id="deleteCurrent" class="danger" hidden>Excluir este capítulo</button></div></section>
+    <div class="field full"><label for="preserveTerms">Termos extras para preservar (opcional)</label><input id="preserveTerms" placeholder="Ex.: Shadow Realm, mana, Ironfang"><p class="term-hint">O leitor tenta identificar nomes próprios recorrentes, mas não é infalível. Use este campo para termos especiais que queira preservar exatamente como estão, separados por vírgulas.</p></div>
+    <div class="field full"><label for="translatorEmail">E-mail para cota maior do MyMemory (opcional)</label><input id="translatorEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"><p class="term-hint">Opcional. Um e-mail válido pode aumentar a cota do MyMemory, mas não elimina todos os limites. Se MyMemory bloquear a solicitação, o leitor tenta um endpoint público do Google Tradutor; ele não é uma API oficial e também pode falhar ou mudar. O e-mail é enviado ao MyMemory; deixe em branco se preferir não compartilhá-lo.</p></div>
+  </div><div class="actions"><button id="translateBtn">Traduzir capítulo inteiro</button><button id="progressiveBtn" class="secondary">Traduzir conforme leio</button><button id="resetTranslationBtn" class="quiet">Reiniciar tradução</button><button id="saveBtn" class="secondary">Salvar capítulo</button><button id="clearEditor" class="quiet">Limpar campos</button></div><div class="translation-progress" id="translationProgress"><div id="translationProgressFill"></div></div><p id="status" class="status" role="status" aria-live="polite"></p><div class="actions"><button id="deleteCurrent" class="danger" hidden>Excluir este capítulo</button></div></section>
   <section class="panel"><div class="section-head" style="margin-top:0"><h2>Tradução em português</h2><span class="pill">Editável</span></div><label for="translated">Revise ou corrija o texto traduzido</label><textarea id="translated" placeholder="A tradução aparecerá aqui..." spellcheck="true"></textarea><div class="actions"><button id="saveTranslation" class="secondary">Salvar tradução</button><button id="openReader">Abrir no leitor ↗</button></div><p class="hint">Os blocos maiores dão mais contexto ao tradutor. O glossário ajuda a manter nomes e termos consistentes; ainda assim, revise expressões idiomáticas e passagens ambíguas.</p></section>
 </section>
 <section class="view" id="readerView">
@@ -81,7 +81,7 @@ body[data-theme="oled"]{--bg:#000;--surface:#0d0d0f;--surface2:#1a1a1e;--text:#f
 </dialog>
 </main>
 <script>
-const $=id=>document.getElementById(id);const KEY='novelReaderBR.v2';const SETTINGS_KEY='novelReaderBR.settings.v1';const GLOSSARY_KEY='novelReaderBR.seriesGlossary.v1';const TRANSLATION_CHECKPOINT_KEY='novelReaderBR.translationCheckpoint.v1';let chapters=[];let current=-1;let savePositionTimer;let readerTheme='dark';let translating=false;let selectedReaderText='';let selectedParagraphIndex=0;let selectedParagraphText='';let selectedParagraphOffset=0;let glossaryBySeries={};
+const $=id=>document.getElementById(id);const KEY='novelReaderBR.v2';const SETTINGS_KEY='novelReaderBR.settings.v1';const GLOSSARY_KEY='novelReaderBR.seriesGlossary.v1';const TRANSLATION_CHECKPOINT_KEY='novelReaderBR.translationCheckpoint.v2';let chapters=[];let current=-1;let savePositionTimer;let readerTheme='dark';let translating=false;let selectedReaderText='';let selectedParagraphIndex=0;let selectedParagraphText='';let selectedParagraphOffset=0;let glossaryBySeries={};
 try{glossaryBySeries=JSON.parse(localStorage.getItem(GLOSSARY_KEY)||'{}');if(!glossaryBySeries||typeof glossaryBySeries!=='object'||Array.isArray(glossaryBySeries))glossaryBySeries={}}catch{glossaryBySeries={}}
 try{chapters=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(chapters))chapters=[]}catch{chapters=[]}
 const defaultSettings={theme:'dark',fontFamily:'Georgia,serif',fontSize:21,lineHeight:19,readerWidth:760,paragraphSpace:11};let settings={...defaultSettings};try{settings={...settings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}}catch{}
@@ -97,17 +97,46 @@ function deleteChapter(i){const ch=chapters[i];if(!ch)return;if(!confirm('Exclui
 function exportLibrary(){const payload={app:'Novel Reader BR',version:2,exportedAt:new Date().toISOString(),chapters,settings,glossaryBySeries};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='novel-reader-br-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
 async function importLibraryFile(file){if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.chapters;if(!Array.isArray(incoming))throw new Error('O arquivo não contém uma biblioteca válida.');if(!confirm('Importar '+incoming.length+' capítulo(s)? Os capítulos serão adicionados à biblioteca atual.'))return;const cleaned=incoming.filter(ch=>ch&&typeof ch==='object').map(ch=>({...ch,seriesName:String(ch.seriesName||''),title:String(ch.title||'Capítulo importado'),url:String(ch.url||''),source:String(ch.source||''),translated:String(ch.translated||''),scrollTop:Number(ch.scrollTop)||0,progress:Number(ch.progress)||0,preserveTerms:String(ch.preserveTerms||''),translatorEmail:String(ch.translatorEmail||'')}));chapters.push(...cleaned);if(data.glossaryBySeries&&typeof data.glossaryBySeries==='object'){for(const [key,rules] of Object.entries(data.glossaryBySeries)){if(!Array.isArray(rules))continue;const existing=Array.isArray(glossaryBySeries[key])?glossaryBySeries[key]:[];const merged=[...existing];for(const rule of rules){if(rule&&rule.source&&typeof rule.replacement==='string'&&!merged.some(x=>String(x.source).toLocaleLowerCase('pt-BR')===String(rule.source).toLocaleLowerCase('pt-BR')))merged.push({source:String(rule.source),replacement:String(rule.replacement),createdAt:rule.createdAt||Date.now()})}glossaryBySeries[key]=merged}saveGlossaries()}if(data.settings&&typeof data.settings==='object'){settings={...settings,...data.settings};saveSettings();applySettings()}if(!persist())return;renderLibrary();showStatus('Backup importado: '+cleaned.length+' capítulo(s).')}catch(e){alert('Não foi possível importar o backup: '+e.message)}finally{$('importLibraryFile').value=''}}
 function renderListButtons(){const ch=currentChapter();$('prev').disabled=current<=0;$('prevBottom').disabled=current<=0;$('next').disabled=current<0||current>=chapters.length-1;$('nextBottom').disabled=$('next').disabled;let meta=ch?(ch.url?'Capítulo salvo · link original disponível':'Capítulo salvo neste navegador'):'Sua leitura traduzida aparecerá aqui.';if(ch&&ch.progressive&&ch.progressive.active)meta='Tradução progressiva · o próximo trecho será traduzido conforme você avança';if(ch&&ch.progressive&&ch.progressive.complete)meta='Tradução progressiva concluída';$('readerMeta').textContent=meta}
-function updateChapter(){const ch=currentChapter();if(!ch)return;$('seriesName').value=ch.seriesName||'';$('chapterTitle').value=ch.title||'';$('chapterUrl').value=ch.url||'';$('source').value=ch.source||'';$('translated').value=ch.translated||'';$('preserveTerms').value=ch.preserveTerms||'';$('translatorEmail').value=ch.translatorEmail||'';$('deleteCurrent').hidden=current<0;$('readerTitle').textContent=ch.title||'Capítulo sem título';renderReaderText(ch.translated||(ch.progressive&&ch.progressive.active?'Preparando a tradução progressiva…':'Este capítulo ainda não tem tradução.'));$('reader').scrollTop=ch.scrollTop||0;updateProgress();renderListButtons();$('sourceCount').textContent=($('source').value||'').length.toLocaleString('pt-BR')+' caracteres'}
-function renderReaderText(text){const reader=$('reader');reader.replaceChildren();const parts=String(text).split(/\n\s*\n/);parts.forEach((part,i)=>{if(i>0)reader.appendChild(document.createTextNode('\n'));const p=document.createElement('p');p.dataset.paragraphIndex=String(i);p.textContent=part;reader.appendChild(p)})}
+function updateChapter(){const ch=currentChapter();if(!ch)return;$('seriesName').value=ch.seriesName||'';$('chapterTitle').value=ch.title||'';$('chapterUrl').value=ch.url||'';$('source').value=ch.source||'';$('translated').value=ch.translated||'';$('preserveTerms').value=ch.preserveTerms||'';$('translatorEmail').value=ch.translatorEmail||'';$('deleteCurrent').hidden=current<0;$('readerTitle').textContent=ch.title||'Capítulo sem título';renderReaderText(ch.translated||(ch.progressive&&ch.progressive.active?'Preparando a tradução progressiva…':'Este capítulo ainda não tem tradução.'));updateProgress();renderListButtons();$('sourceCount').textContent=($('source').value||'').length.toLocaleString('pt-BR')+' caracteres'}
+function renderReaderText(text){
+  const reader=$('reader');reader.replaceChildren();
+  const parts=String(text).split(/\n\s*\n/);
+  parts.forEach((part,i)=>{if(i>0)reader.appendChild(document.createTextNode('\n'));const p=document.createElement('p');p.dataset.paragraphIndex=String(i);p.textContent=part;reader.appendChild(p)});
+  const sentinel=document.createElement('div');sentinel.id='progressiveSentinel';sentinel.style.height='1px';sentinel.setAttribute('aria-hidden','true');reader.appendChild(sentinel);
+  observeProgressiveSentinel();
+}
 function renderList(){renderListButtons()}
 function updateProgress(){const ch=currentChapter();if(!ch){$('progress').textContent='0% lido';$('progressFill').style.width='0%';return}const doc=document.documentElement;const max=Math.max(0,doc.scrollHeight-window.innerHeight);const percent=max>0?Math.min(100,Math.round(window.scrollY/max*100)):100;ch.scrollTop=window.scrollY;ch.progress=percent;$('progress').textContent=percent+'% lido';$('progressFill').style.width=percent+'%'}
-function saveCurrent(){const ch=currentChapter();if(!ch)return false;const oldSource=ch.source;ch.seriesName=$('seriesName').value.trim();ch.title=$('chapterTitle').value.trim();ch.url=$('chapterUrl').value.trim();ch.source=$('source').value;ch.translated=$('translated').value;ch.preserveTerms=$('preserveTerms').value;ch.translatorEmail=$('translatorEmail').value.trim();if(ch.progressive&&(oldSource!==ch.source||ch.progressive.termsText!==ch.preserveTerms||ch.progressive.seriesName!==(ch.seriesName||'')||ch.progressive.email!==ch.translatorEmail)){ch.progressive.active=false;ch.progressive.complete=false}ch.scrollTop=$('reader').scrollTop;return persist()}
+function saveCurrent(){const ch=currentChapter();if(!ch)return false;const oldSource=ch.source;ch.seriesName=$('seriesName').value.trim();ch.title=$('chapterTitle').value.trim();ch.url=$('chapterUrl').value.trim();ch.source=$('source').value;ch.translated=$('translated').value;ch.preserveTerms=$('preserveTerms').value;ch.translatorEmail=$('translatorEmail').value.trim();if(ch.progressive&&(oldSource!==ch.source||ch.progressive.termsText!==ch.preserveTerms||ch.progressive.seriesName!==(ch.seriesName||'')||ch.progressive.email!==ch.translatorEmail)){ch.progressive.active=false;ch.progressive.complete=false}if($('readerView').classList.contains('active'))ch.scrollTop=window.scrollY;return persist()}
 function clearEditor(){current=-1;$('seriesName').value='';$('chapterTitle').value='';$('chapterUrl').value='';$('source').value='';$('translated').value='';$('preserveTerms').value='';$('translatorEmail').value='';$('deleteCurrent').hidden=true;$('sourceCount').textContent='0 caracteres';showStatus('');$('readerTitle').textContent='Escolha um capítulo';renderReaderText('Escolha um capítulo na biblioteca para começar a ler.');renderListButtons()}
 function editChapter(i){if(current>=0)saveCurrent();current=i;updateChapter();showStatus('Capítulo carregado para edição.');setView('editor')}
-function openChapter(i){if(current>=0)saveCurrent();current=i;updateChapter();setView('reader');const ch=currentChapter();if(ch&&ch.progressive&&ch.progressive.active){progressiveFillAttempts=0;setTimeout(()=>loadProgressiveBatch(3,true),250)}}
+function openChapter(i){if(current>=0)saveCurrent();current=i;updateChapter();setView('reader');const ch=currentChapter();setTimeout(()=>window.scrollTo({top:Math.max(0,Number(ch&&ch.scrollTop)||0),behavior:'auto'}),60);if(ch&&ch.progressive&&ch.progressive.active){progressiveFillAttempts=0;setTimeout(()=>loadProgressiveBatch(3,true),250)}}
 function saveAsChapter(){const title=$('chapterTitle').value.trim();const source=$('source').value.trim();const translated=$('translated').value.trim();if(!source&&!translated){showStatus('Cole o texto original ou uma tradução primeiro.');return}if(current>=0){saveCurrent();const ch=currentChapter();ch.seriesName=$('seriesName').value.trim();ch.title=title||ch.title||'Capítulo '+(current+1);ch.url=$('chapterUrl').value.trim();ch.source=$('source').value;ch.translated=$('translated').value;ch.preserveTerms=$('preserveTerms').value;ch.translatorEmail=$('translatorEmail').value.trim();if(persist()){updateChapter();showStatus('Capítulo atualizado e salvo.')}return}chapters.push({seriesName:$('seriesName').value.trim(),title:title||'Capítulo '+(chapters.length+1),url:$('chapterUrl').value.trim(),source,translated,preserveTerms:$('preserveTerms').value,translatorEmail:$('translatorEmail').value.trim(),scrollTop:0,progress:0});current=chapters.length-1;if(persist()){updateChapter();showStatus('Capítulo salvo na biblioteca.');$('libraryCount').textContent=chapters.length+' capítulos'}}
 function utf8Length(text){return new TextEncoder().encode(text).length}
-function splitForMyMemory(text,maxBytes=1400){const chunks=[];let buffer='';const pushChunk=(value)=>{if(!value)return;const match=value.match(/[ \t]+$/);const body=match?value.slice(0,-match[0].length):value;if(body)chunks.push(body);if(match)chunks.push({separator:match[0]})};const flush=()=>{if(buffer){pushChunk(buffer);buffer=''}};const splitLong=(value)=>{let part='';for(const ch of value){if(part&&utf8Length(part+ch)>maxBytes){pushChunk(part);part=''}part+=ch}if(part)pushChunk(part)};const paragraphs=String(text).split(/(\n[ \t]*\n+)/);for(const piece of paragraphs){if(/^\n[ \t]*\n+$/.test(piece)){flush();chunks.push({separator:piece});continue}if(!piece)continue;const sentences=piece.match(/[^.!?]+[.!?]+(?:[”’"']*)?[ \t]*|[^.!?]+$/g)||[piece];for(const sentence of sentences){if(!sentence)continue;if(utf8Length(sentence)>maxBytes){flush();let part='';for(const token of sentence.split(/(\s+)/)){if(utf8Length(token)>maxBytes){if(part){pushChunk(part);part=''}splitLong(token)}else if(part&&utf8Length(part+token)>maxBytes){pushChunk(part);part=token}else part+=token}if(part)pushChunk(part)}else if(buffer&&utf8Length(buffer+sentence)>maxBytes){flush();buffer=sentence}else buffer+=sentence}}flush();return chunks}
+function splitForMyMemory(text,maxBytes=1400){
+  const chunks=[];let buffer='';
+  const pushChunk=value=>{if(!value)return;const match=value.match(/[ \t]+$/);const body=match?value.slice(0,-match[0].length):value;if(body)chunks.push(body);if(match)chunks.push({separator:match[0]})};
+  const flush=()=>{if(buffer){pushChunk(buffer);buffer=''}};
+  const splitLong=value=>{let part='';for(const ch of value){if(part&&utf8Length(part+ch)>maxBytes){pushChunk(part);part=''}part+=ch}if(part)pushChunk(part)};
+  const paragraphs=String(text).split(/(\n[ \t]*\n+)/);
+  for(let index=0;index<paragraphs.length;index++){
+    const piece=paragraphs[index];
+    if(/^\n[ \t]*\n+$/.test(piece)){
+      const next=paragraphs[index+1]||'';
+      if(buffer&&next&&utf8Length(buffer+piece)<=maxBytes){buffer+=piece;continue}
+      flush();chunks.push({separator:piece});continue;
+    }
+    if(!piece)continue;
+    const sentences=piece.match(/[^.!?]+[.!?]+(?:[”’"']*)?[ \t]*|[^.!?]+$/g)||[piece];
+    for(const sentence of sentences){
+      if(!sentence)continue;
+      if(utf8Length(sentence)>maxBytes){flush();let part='';for(const token of sentence.split(/(\s+)/)){if(utf8Length(token)>maxBytes){if(part){pushChunk(part);part=''}splitLong(token)}else if(part&&utf8Length(part+token)>maxBytes){pushChunk(part);part=token}else part+=token}if(part)pushChunk(part)}
+      else if(buffer&&utf8Length(buffer+sentence)>maxBytes){flush();buffer=sentence}
+      else buffer+=sentence;
+    }
+  }
+  flush();return chunks;
+}
 function normalizeNovelKey(name){return String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR')}
 function saveGlossaries(){try{localStorage.setItem(GLOSSARY_KEY,JSON.stringify(glossaryBySeries));return true}catch{return false}}
 function getSeriesRules(seriesName){const key=normalizeNovelKey(seriesName);return key&&Array.isArray(glossaryBySeries[key])?glossaryBySeries[key].filter(r=>r&&String(r.source||'').trim()&&typeof r.replacement==='string'):[]}
@@ -115,41 +144,66 @@ function escapeRegExp(value){return String(value).replace(/[.*+?^${}()|[\]\\]/g,
 function protectTerms(text,terms){const replacements=[];let protectedText=String(text);const normalized=terms.map(t=>typeof t==='string'?{source:t,replacement:t}:{source:String(t.source||''),replacement:String(t.replacement??t.source??'')}).filter(t=>t.source.trim()).sort((a,b)=>b.source.length-a.source.length);const unique=[];const seen=new Set();for(const item of normalized){const key=item.source.toLocaleLowerCase('pt-BR');if(!seen.has(key)){seen.add(key);unique.push(item)}}unique.forEach((item,i)=>{const token='QZXTERM'+i+'XZQ';const pattern=escapeRegExp(item.source);const re=new RegExp('(^|[^\\p{L}\\p{N}_])('+pattern+')(?=$|[^\\p{L}\\p{N}_])','giu');let found=false;protectedText=protectedText.replace(re,(whole,before)=>{found=true;return before+token});if(found)replacements.push({token,term:item.replacement})});return {text:protectedText,replacements}}
 function restoreTerms(text,replacements){for(const item of replacements){text=text.replace(new RegExp(escapeRegExp(item.token),'gi'),item.term)}return text}
 function detectProperTerms(text){
-  const ignored=new Set(('The A An He She It We They I You His Her Their Our Your This That These Those Then Only So My Yes No By At For When While As After Before But And Or If In On Of From To With Without During Once Now Not One Several All Some Each Every Many More Most Very What Who How Why Where Which There Here Back Even Already Still Perhaps Finally However Although Because Since Until First Last Next New Old Good Great Little Much Any Both Either Neither Own Same Such Other Another Yet Also Just Do Does Did Can Could Would Should Will Shall May Might Must Am Is Are Was Were Be Been Being Has Have Had Having Says Said Asked Told Came Went Looked Look Lifted Turned Stopped Appeared Thought Knew Felt Saw Heard Made Took Give Take Get Got Go Come Went Come Let Ask Tell Say Called Started Ended Began Continued Returned Around Across Through Into Onto Over Under Up Down Out Off Away Again Suddenly Quietly Slowly Quickly Perhaps Tonight Today Tomorrow Yesterday Morning Afternoon Evening Night Chapter Part Volume Book Section Prince Princess King Queen Lord Lady Sir Madam Master Mistress Captain General Sergeant Chief Steward Brother Sister Father Mother House Houses Palace Kitchen Kitchens').split(/\s+/))
-  const counts=new Map(), firstSeen=new Map();
+  // Capitalization by itself is weak evidence: sentence beginnings, dialogue and contractions are not names.
+  const ignored=new Set((`the a an he she it we they i you his her their our your this that these those then only so my yes no by at for when while as after before but and or if in on of from to with without during once now not one several all some each every many more most very what who how why where which there here back even already still perhaps finally however although because since until first last next new old good great little much any both either neither own same such other another yet also just do does did can could would should will shall may might must am is are was were be been being has have had having says said asked told came went look looked looking lift lifted raise raised turn turned stop stopped appeared thought knew felt saw heard made took give take get got go let ask tell say called started ended began continued returned around across through into onto over under up down out off away again suddenly quietly slowly quickly tonight today tomorrow morning afternoon evening night chapter part volume book section prince princess king queen lord lady sir madam master mistress captain general sergeant chief steward brother sister father mother house houses palace kitchen kitchens eyes looking human wild anger darkness instead always nothing besides somehow wine pour lye stop steel household hands good morning afternoon evening maybe`).split(/\s+/).map(x=>x.toLocaleLowerCase('en')));
+  const contractions=new Set((`i'm i've i'll i'd we're we've we'll we'd they're they've they'll they'd you're you've you'll you'd he's he'll she'd she's she'll it's it'll it'd that's there's here's what's who's where's when's why's how's let's can't cannot don't doesn't didn't isn't aren't wasn't weren't won't wouldn't shouldn't couldn't mustn't mightn't haven't hasn't hadn't`).split(/\s+/).map(x=>x.toLocaleLowerCase('en')));
+  const counts=new Map(),midSentenceCounts=new Map(),firstSeen=new Map();
   const re=/\p{Lu}[\p{Ll}\p{M}]*(?:['’][\p{Lu}]?[\p{Ll}\p{M}]+)*(?:-[\p{Lu}]?[\p{Ll}\p{M}]+)*/gu;
-  for(const match of String(text||'').matchAll(re)){
-    const term=match[0].replace(/['’]s$/i,''); if([...term].length<2||ignored.has(term))continue;
-    const key=term.toLocaleLowerCase('en'); counts.set(key,(counts.get(key)||0)+1);
-    const prefix=String(text).slice(0,match.index); const boundary=Math.max(prefix.lastIndexOf('.'),prefix.lastIndexOf('!'),prefix.lastIndexOf('?'),prefix.lastIndexOf('\n'));
+  const source=String(text||'');
+  for(const match of source.matchAll(re)){
+    const term=match[0].replace(/['’]s$/i,'');const key=term.toLocaleLowerCase('en');
+    if([...term].length<2||ignored.has(key)||contractions.has(key))continue;
+    counts.set(key,(counts.get(key)||0)+1);
+    // Newlines can be visual wrapping or paragraph separators; only punctuation marks sentence boundaries.
+    const prefix=source.slice(0,match.index);const boundary=Math.max(prefix.lastIndexOf('.'),prefix.lastIndexOf('!'),prefix.lastIndexOf('?'));
     const afterBoundary=prefix.slice(boundary+1).replace(/^[\s"'“”‘’—–()[\]{}]+/u,'');
-    const suffix=String(text).slice(match.index+term.length);
-    const quotedStandalone=/["“‘]\s*$/.test(prefix)&&/^[.!?…]*["”’]/u.test(suffix);
-    if(!firstSeen.has(key))firstSeen.set(key,{term,sentenceStart:afterBoundary.length===0&&!quotedStandalone});
+    const sentenceStart=afterBoundary.length===0;
+    if(!sentenceStart)midSentenceCounts.set(key,(midSentenceCounts.get(key)||0)+1);
+    if(!firstSeen.has(key))firstSeen.set(key,{term});
   }
   const terms=[];
-  for(const [key,count] of counts){const info=firstSeen.get(key);if(info&&(!info.sentenceStart||count>=2))terms.push(info.term)}
+  for(const [key,count] of counts){
+    const term=firstSeen.get(key)?.term||key;const mid=midSentenceCounts.get(key)||0;
+    const unusualName=/['’]/u.test(term)&&!contractions.has(key);
+    // Capitalization inside a sentence is strong evidence; repeated names also survive if they occur mostly at sentence beginnings.
+    if(unusualName||mid>=1||count>=4)terms.push(term);
+  }
   return terms;
 }
 function getNovelGlossary(seriesName,currentTerms,currentSource=''){const key=normalizeNovelKey(seriesName);const values=[];const sources=[];if(key){for(const ch of chapters){if(normalizeNovelKey(ch.seriesName)===key){if(ch.preserveTerms)values.push(...ch.preserveTerms.split(','));if(ch.source)sources.push(ch.source)}}}if(currentTerms)values.push(...currentTerms.split(','));if(currentSource)sources.push(currentSource);values.push(...detectProperTerms(sources.join('\n')));const rules=getSeriesRules(seriesName);const normalized=[...new Set(values.map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>b.length-a.length);return [...rules,...normalized.filter(t=>!rules.some(r=>r.source.toLocaleLowerCase('pt-BR')===t.toLocaleLowerCase('pt-BR'))) ]}
 function glossarySignature(terms){return terms.map(t=>typeof t==='string'?'='+t:t.source+'=>'+t.replacement).join(' | ')}
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+async function fetchWithBackoff(url){
+  let lastError;
+  for(let attempt=0;attempt<3;attempt++){
+    let response;
+    try{response=await fetch(url)}catch(error){lastError=error;if(attempt<2){await sleep(700*(attempt+1));continue}throw new Error('falha de rede/CORS: '+(error.message||'não foi possível acessar o serviço'));}
+    if((response.status===429||response.status>=500)&&attempt<2){
+      const retryAfter=Number(response.headers.get('Retry-After'))||0;
+      await sleep(Math.min(6000,Math.max(retryAfter*1000,900*(attempt+1))));
+      continue;
+    }
+    return response;
+  }
+  throw lastError||new Error('serviço temporariamente indisponível');
+}
 async function requestMyMemoryTranslation(chunk,email){
   const query={q:chunk,langpair:'en|pt-BR',mt:'1'};
   if(email)query.de=email;
-  const response=await fetch('https://api.mymemory.translated.net/get?'+new URLSearchParams(query).toString());
+  const response=await fetchWithBackoff('https://api.mymemory.translated.net/get?'+new URLSearchParams(query).toString());
   if(response.status===429)throw new Error('MyMemory retornou HTTP 429 (limite de uso).');
   if(!response.ok)throw new Error('MyMemory retornou HTTP '+response.status+'.');
   const data=await response.json();
   if(data.responseStatus!==200||!data.responseData||!data.responseData.translatedText){
-    throw new Error(data.responseDetails||'MyMemory não retornou uma tradução.');
+    const details=String(data.responseDetails||'MyMemory não retornou uma tradução.');
+    throw new Error(Number(data.responseStatus)===429?'MyMemory atingiu o limite de uso (429).':details);
   }
   return data.responseData.translatedText;
 }
 async function requestGoogleFallback(chunk){
   // Endpoint público usado pelo cliente web do Google Tradutor; não é uma API oficial com SLA.
   const query=new URLSearchParams({client:'gtx',sl:'en',tl:'pt',dt:'t',q:chunk});
-  const response=await fetch('https://translate.googleapis.com/translate_a/single?'+query.toString());
+  const response=await fetchWithBackoff('https://translate.googleapis.com/translate_a/single?'+query.toString());
   if(!response.ok)throw new Error('alternativa Google retornou HTTP '+response.status+'.');
   const data=await response.json();
   if(!Array.isArray(data)||!Array.isArray(data[0]))throw new Error('resposta inesperada da alternativa Google.');
@@ -164,7 +218,7 @@ async function requestMyMemoryLongChunk(chunk,email){
     if(typeof part==='object'){output.push(part.separator||'');continue}
     if(!part.trim()){output.push(part);continue}
     output.push(await requestMyMemoryTranslation(part,email));
-    await sleep(180);
+    await sleep(650);
   }
   return output.join('');
 }
@@ -178,31 +232,81 @@ async function requestTranslation(chunk,email){
     throw new Error('Google Tradutor: '+googleError.message+' MyMemory: '+myMemoryError.message+' Tente novamente mais tarde.');
   }
 }
+function translationQualityWarning(text){
+  const matches=String(text||'').match(/\b(?:I've|I'll|I'd|I'm|we're|we've|we'll|we'd|you're|you've|you'll|they're|they've|they'll|he's|she's|it's|don't|doesn't|didn't|isn't|aren't|wasn't|weren't|can't|won't|wouldn't|shouldn't|couldn't|haven't|hasn't|hadn't|there's|that's|what's|who's)\b/gi)||[];
+  return matches.length?` Atenção: detectei ${matches.length} possível(is) contração(ões) em inglês que pode(m) ter ficado sem traduzir. Revise o texto ou refaça a tradução.`:'';
+}
+
 function saveTranslationCheckpoint(checkpoint){try{localStorage.setItem(TRANSLATION_CHECKPOINT_KEY,JSON.stringify(checkpoint));return true}catch{return false}}
 async function translateChapter(){const original=$('source').value;if(!original.trim()){showStatus('Cole o texto original antes de traduzir.');return}if(translating)return;translating=true;$('translateBtn').disabled=true;$('translationProgress').style.display='block';$('translationProgressFill').style.width='0%';try{const termsText=$('preserveTerms').value;const seriesName=$('seriesName').value.trim();const email=$('translatorEmail').value.trim();const terms=getNovelGlossary(seriesName,termsText,original);const glossaryText=glossarySignature(terms);const protectedData=protectTerms(original,terms);const jobs=splitForMyMemory(protectedData.text,1400);let checkpoint=null;try{checkpoint=JSON.parse(localStorage.getItem(TRANSLATION_CHECKPOINT_KEY)||'null')}catch{}if(!checkpoint||checkpoint.source!==original||checkpoint.termsText!==termsText||checkpoint.seriesName!==seriesName||checkpoint.glossaryText!==glossaryText||checkpoint.email!==email||!Array.isArray(checkpoint.results)){checkpoint={source:original,termsText,seriesName,glossaryText,email,results:new Array(jobs.length),updatedAt:Date.now()}}if(checkpoint.results.length!==jobs.length)checkpoint.results=new Array(jobs.length);const results=new Array(jobs.length);const pending=[];for(let i=0;i<jobs.length;i++){if(typeof jobs[i]==='object'){results[i]=jobs[i].separator}else if(typeof jobs[i]==='string'&&jobs[i].trim()){if(typeof checkpoint.results[i]==='string'&&checkpoint.results[i])results[i]=checkpoint.results[i];else pending.push({piece:jobs[i],index:i})}else results[i]=jobs[i]}let done=jobs.length-pending.length;const total=jobs.filter(x=>typeof x==='string'&&x.trim()).length;$('translationProgressFill').style.width=Math.round(total?done/total*100:0)+'%';if(!pending.length)showStatus('Todos os trechos já estavam traduzidos. Montando o capítulo…');else showStatus('Preparando tradução: '+done+' de '+total+' trechos já disponíveis.');
 // Uma requisição por vez evita rajadas que costumam disparar HTTP 429.
 for(let p=0;p<pending.length;p++){const job=pending[p];showStatus('Traduzindo trecho '+(done+1)+' de '+total+'. Os trechos concluídos ficam guardados para retomada.');const translated=await requestTranslation(job.piece,email);results[job.index]=translated;checkpoint.results[job.index]=translated;checkpoint.updatedAt=Date.now();saveTranslationCheckpoint(checkpoint);done++;$('translationProgressFill').style.width=Math.round(done/total*100)+'%';if(current>=0){const ch=currentChapter();if(ch){ch.seriesName=seriesName;ch.source=original;ch.preserveTerms=termsText;ch.translatorEmail=email;ch.translated=restoreTerms(results.map((v,i)=>v===undefined?(typeof jobs[i]==='object'?jobs[i].separator:''):v).join(''),protectedData.replacements);persist()}}if(p<pending.length-1)await sleep(250)}
-const translated=restoreTerms(results.map((v,i)=>v===undefined?(typeof jobs[i]==='object'?jobs[i].separator:''):v).join(''),protectedData.replacements);$('translated').value=translated;if(current>=0)saveCurrent();$('translationProgressFill').style.width='100%';try{localStorage.removeItem(TRANSLATION_CHECKPOINT_KEY)}catch{}showStatus('Tradução concluída! Foram processados '+total+' trechos. Revise o resultado e salve o capítulo.')}catch(error){showStatus('A tradução foi interrompida: '+error.message+'\nOs trechos já concluídos foram guardados neste navegador. Clique novamente em “Traduzir para PT-BR” para tentar retomar sem repetir tudo.')}finally{translating=false;$('translateBtn').disabled=false;setTimeout(()=>$('translationProgress').style.display='none',1800)}}
+const translated=restoreTerms(results.map((v,i)=>v===undefined?(typeof jobs[i]==='object'?jobs[i].separator:''):v).join(''),protectedData.replacements);$('translated').value=translated;if(current>=0)saveCurrent();$('translationProgressFill').style.width='100%';try{localStorage.removeItem(TRANSLATION_CHECKPOINT_KEY)}catch{}showStatus('Tradução concluída! Foram processados '+total+' trechos. Revise o resultado e salve o capítulo.'+translationQualityWarning(translated))}catch(error){showStatus('A tradução foi interrompida: '+error.message+'\nOs trechos já concluídos foram guardados neste navegador. Clique novamente em “Traduzir para PT-BR” para tentar retomar sem repetir tudo.')}finally{translating=false;$('translateBtn').disabled=false;setTimeout(()=>$('translationProgress').style.display='none',1800)}}
 // Tradução progressiva: traduz os primeiros trechos e carrega mais quando o leitor se aproxima do fim.
 let progressiveLoading=false;
 let progressiveFillAttempts=0;
+let progressiveObserver=null;
+function observeProgressiveSentinel(){
+  if(!('IntersectionObserver' in window))return;
+  if(progressiveObserver)progressiveObserver.disconnect();
+  const sentinel=$('progressiveSentinel');if(!sentinel)return;
+  progressiveObserver=new IntersectionObserver(entries=>{
+    if(entries.some(entry=>entry.isIntersecting)){
+      const ch=currentChapter();if(ch&&ch.progressive&&ch.progressive.active&&!progressiveLoading)loadProgressiveBatch(3,true);
+    }
+  },{root:null,rootMargin:'1000px 0px 1000px 0px',threshold:0});
+  progressiveObserver.observe(sentinel);
+}
 function setProgressiveStatus(message){const el=$('readerTranslationStatus');if(el)el.textContent=message;showStatus(message)}
 function progressiveText(ch){if(!ch||!ch.progressive)return '';let out='';for(let i=0;i<ch.progressive.results.length;i++){const value=ch.progressive.results[i];if(value===null||value===undefined)break;out+=value}return out}
 function progressiveRemaining(ch){if(!ch||!ch.progressive)return 0;return ch.progressive.chunks.reduce((n,p,i)=>n+(typeof p==='string'&&p.trim()&&ch.progressive.results[i]==null?1:0),0)}
-function refreshProgressiveReader(ch,keepScroll=true){if(!ch)return;const reader=$('reader');const oldTop=reader.scrollTop;const text=progressiveText(ch);ch.translated=text;$('translated').value=text;renderReaderText(text);if(keepScroll)reader.scrollTop=oldTop;renderListButtons();updateProgress();persist()}
-async function loadProgressiveBatch(count=3,fillViewport=false){const ch=currentChapter();if(!ch||!ch.progressive||!ch.progressive.active||progressiveLoading)return;const pg=ch.progressive;const sourceNow=$('source').value; if(pg.source!==sourceNow){showStatus('O texto original mudou. Inicie novamente a tradução progressiva para sincronizar os trechos.');return}progressiveLoading=true;let processed=0;try{while(processed<count){let index=-1;for(let i=0;i<pg.chunks.length;i++){if(typeof pg.chunks[i]==='string'&&pg.chunks[i].trim()&&pg.results[i]==null){index=i;break}}if(index<0)break;setProgressiveStatus('Traduzindo o próximo trecho… A leitura continua disponível enquanto preparo o restante.');const translated=await requestTranslation(pg.chunks[index],pg.email);if(!pg.active)break;pg.results[index]=restoreTerms(translated,pg.replacements||[]);pg.updatedAt=Date.now();processed++;refreshProgressiveReader(ch,true);await sleep(900)}
-if(progressiveRemaining(ch)===0){pg.active=false;pg.complete=true;setProgressiveStatus('Capítulo totalmente traduzido. Boa leitura!');refreshProgressiveReader(ch,true)}else{setProgressiveStatus('Tradução pronta até aqui. Continue lendo; os próximos trechos serão carregados automaticamente.');}
-}catch(error){setProgressiveStatus('A tradução progressiva foi pausada: '+error.message+' Você pode continuar lendo o que já foi traduzido e tentar novamente mais tarde.');}finally{progressiveLoading=false;if(ch.progressive&&ch.progressive.active){const pageHeight=document.documentElement.scrollHeight;const viewportTooShort=pageHeight<=window.innerHeight+250;if(viewportTooShort&&progressiveFillAttempts<10&&progressiveRemaining(ch)>0){progressiveFillAttempts++;setTimeout(()=>loadProgressiveBatch(3,true),500)}else progressiveFillAttempts=0}}}
+function refreshProgressiveReader(ch,keepScroll=true){if(!ch)return;const oldTop=window.scrollY;const text=progressiveText(ch);ch.translated=text;$('translated').value=text;renderReaderText(text);if(keepScroll)window.scrollTo({top:oldTop,behavior:'auto'});renderListButtons();updateProgress();persist()}
+async function loadProgressiveBatch(count=3,fillViewport=false){
+  const ch=currentChapter();if(!ch||!ch.progressive||!ch.progressive.active||progressiveLoading)return;
+  const pg=ch.progressive;const sourceNow=$('source').value;
+  if(pg.source!==sourceNow){setProgressiveStatus('O texto original mudou. Salve-o e reinicie a tradução progressiva para sincronizar os trechos.');pg.active=false;persist();return}
+  progressiveLoading=true;let processed=0;let failed=false;
+  try{
+    while(processed<count){
+      let index=-1;for(let i=0;i<pg.chunks.length;i++){if(typeof pg.chunks[i]==='string'&&pg.chunks[i].trim()&&pg.results[i]==null){index=i;break}}
+      if(index<0)break;
+      setProgressiveStatus('Traduzindo o próximo trecho… A leitura continua disponível enquanto preparo o restante.');
+      const translated=await requestTranslation(pg.chunks[index],pg.email);if(!pg.active)break;
+      pg.results[index]=restoreTerms(translated,pg.replacements||[]);pg.updatedAt=Date.now();processed++;refreshProgressiveReader(ch,true);
+      if(processed<count)await sleep(500);
+    }
+    if(progressiveRemaining(ch)===0){pg.active=false;pg.complete=true;setProgressiveStatus('Capítulo totalmente traduzido. Boa leitura!'+translationQualityWarning(progressiveText(ch)));refreshProgressiveReader(ch,true)}
+    else setProgressiveStatus('Tradução pronta até aqui. Continue lendo; os próximos trechos serão carregados automaticamente.');
+  }catch(error){
+    failed=true;pg.active=false;pg.lastError=error.message;pg.updatedAt=Date.now();persist();
+    setProgressiveStatus('A tradução foi pausada por um erro: '+error.message+' O texto já traduzido foi salvo. Volte ao editor e toque em “Traduzir conforme leio” para tentar continuar.');
+  }finally{
+    progressiveLoading=false;
+    if(!failed&&ch.progressive&&ch.progressive.active&&progressiveRemaining(ch)>0){
+      const nearBottom=window.scrollY+window.innerHeight>=document.documentElement.scrollHeight-1100;
+      if(nearBottom)setTimeout(()=>loadProgressiveBatch(3,true),350);
+    }
+  }
+}
 function startProgressiveTranslation(){const original=$('source').value;if(!original.trim()){showStatus('Cole o texto original antes de iniciar a tradução.');return}if(translating||progressiveLoading){showStatus('Já existe uma tradução em andamento.');return}if(current<0){saveAsChapter();if(current<0)return}else{saveCurrent()}const ch=currentChapter();const termsText=$('preserveTerms').value;const seriesName=$('seriesName').value.trim();const email=$('translatorEmail').value.trim();ch.seriesName=seriesName;ch.title=$('chapterTitle').value.trim()||ch.title;ch.url=$('chapterUrl').value.trim();ch.source=original;ch.preserveTerms=termsText;ch.translatorEmail=email;
 // Nunca apagar uma tradução completa que já esteja salva.
-if(ch.translated&&ch.translated.trim()&&(!ch.progressive||ch.progressive.source!==original||ch.progressive.complete)){ $('readerTitle').textContent=ch.title||'Capítulo sem título';renderReaderText(ch.translated);$('translated').value=ch.translated;setView('reader');setProgressiveStatus('Este capítulo já tem uma tradução salva. Exibindo o texto existente sem fazer novas requisições.');return}
+if(ch.translated&&ch.translated.trim()&&(!ch.progressive||ch.progressive.source!==original||(ch.progressive.complete&&ch.progressive.engineVersion===2))){ $('readerTitle').textContent=ch.title||'Capítulo sem título';renderReaderText(ch.translated);$('translated').value=ch.translated;setView('reader');setProgressiveStatus('Este capítulo já tem uma tradução salva. Exibindo o texto existente sem fazer novas requisições.');return}
 // Se uma tradução progressiva foi interrompida, retoma os trechos já guardados.
-const novelTerms=getNovelGlossary(seriesName,termsText,original);const glossaryText=glossarySignature(novelTerms);if(ch.progressive&&ch.progressive.source===original&&ch.progressive.termsText===termsText&&ch.progressive.seriesName===seriesName&&ch.progressive.glossaryText===glossaryText&&ch.progressive.email===email&&!ch.progressive.complete){ch.progressive.active=true;$('readerTitle').textContent=ch.title||'Capítulo sem título';renderReaderText(progressiveText(ch)||'Retomando a tradução…');$('translated').value=progressiveText(ch);setView('reader');setProgressiveStatus('Retomando a tradução progressiva a partir dos trechos já salvos.');progressiveFillAttempts=0;loadProgressiveBatch(3,true);return}
-const protectedData=protectTerms(original,novelTerms);const chunks=splitForMyMemory(protectedData.text,1400);ch.translated='';ch.scrollTop=0;ch.progress=0;ch.progressive={source:original,termsText,seriesName,glossaryText,email,chunks,results:chunks.map(piece=>typeof piece==='object'?piece.separator:null),replacements:protectedData.replacements,active:true,complete:false,updatedAt:Date.now()};persist();$('readerTitle').textContent=ch.title||'Capítulo sem título';$('reader').scrollTop=0;renderReaderText('Preparando a tradução…');$('translated').value='';renderListButtons();setView('reader');setProgressiveStatus('Começando pelos primeiros trechos, em blocos maiores para preservar melhor o contexto. O restante será traduzido conforme você avança.');progressiveFillAttempts=0;loadProgressiveBatch(3,true)}
-function maybeLoadProgressive(){const ch=currentChapter();if(!ch||!ch.progressive||!ch.progressive.active||progressiveLoading)return;const pageBottom=window.scrollY+window.innerHeight;const nearBottom=pageBottom>=document.documentElement.scrollHeight-700;if(nearBottom)loadProgressiveBatch(3,false)}
+const novelTerms=getNovelGlossary(seriesName,termsText,original);const glossaryText=glossarySignature(novelTerms);if(ch.progressive&&ch.progressive.source===original&&ch.progressive.termsText===termsText&&ch.progressive.seriesName===seriesName&&ch.progressive.glossaryText===glossaryText&&ch.progressive.email===email&&ch.progressive.engineVersion===2&&!ch.progressive.complete){ch.progressive.active=true;$('readerTitle').textContent=ch.title||'Capítulo sem título';renderReaderText(progressiveText(ch)||'Retomando a tradução…');$('translated').value=progressiveText(ch);setView('reader');setProgressiveStatus('Retomando a tradução progressiva a partir dos trechos já salvos.');progressiveFillAttempts=0;loadProgressiveBatch(3,true);return}
+const protectedData=protectTerms(original,novelTerms);const chunks=splitForMyMemory(protectedData.text,1400);ch.translated='';ch.scrollTop=0;ch.progress=0;ch.progressive={engineVersion:2,source:original,termsText,seriesName,glossaryText,email,chunks,results:chunks.map(piece=>typeof piece==='object'?piece.separator:null),replacements:protectedData.replacements,active:true,complete:false,updatedAt:Date.now()};persist();$('readerTitle').textContent=ch.title||'Capítulo sem título';$('reader').scrollTop=0;renderReaderText('Preparando a tradução…');$('translated').value='';renderListButtons();setView('reader');setProgressiveStatus('Começando pelos primeiros trechos, em blocos maiores para preservar melhor o contexto. O restante será traduzido conforme você avança.');progressiveFillAttempts=0;loadProgressiveBatch(3,true)}
+function maybeLoadProgressive(){const ch=currentChapter();if(!ch||!ch.progressive||!ch.progressive.active||progressiveLoading)return;const pageBottom=window.scrollY+window.innerHeight;const nearBottom=pageBottom>=document.documentElement.scrollHeight-1000;if(nearBottom)loadProgressiveBatch(3,false)}
 $('librarySearch').addEventListener('input',renderLibrary);$('exportLibrary').addEventListener('click',exportLibrary);$('importLibraryBtn').addEventListener('click',()=>$('importLibraryFile').click());$('importLibraryFile').addEventListener('change',e=>importLibraryFile(e.target.files[0]));$('deleteCurrent').addEventListener('click',()=>{if(current>=0)deleteChapter(current)});
-$('translateBtn').addEventListener('click',translateChapter);$('progressiveBtn').addEventListener('click',startProgressiveTranslation);$('saveBtn').addEventListener('click',saveAsChapter);$('saveTranslation').addEventListener('click',()=>{if(current<0){saveAsChapter();return}if(saveCurrent()){renderReaderText($('translated').value||'');showStatus('Capítulo e tradução salvos.')}});$('openReader').addEventListener('click',()=>{if(current<0){saveAsChapter();if(current<0)return}else saveCurrent();updateChapter();setView('reader')});$('addFirst').addEventListener('click',()=>{clearEditor();setView('editor')});$('clearEditor').addEventListener('click',clearEditor);$('backLibrary').addEventListener('click',()=>{if(current>=0)saveCurrent();setView('library')});
-function moveChapter(delta){const next=current+delta;if(next>=0&&next<chapters.length){saveCurrent();current=next;updateChapter();$('reader').scrollTop=0;updateProgress()}}$('prev').addEventListener('click',()=>moveChapter(-1));$('prevBottom').addEventListener('click',()=>moveChapter(-1));$('next').addEventListener('click',()=>moveChapter(1));$('nextBottom').addEventListener('click',()=>moveChapter(1));
+function resetTranslation(){
+  const ch=currentChapter();
+  if(!String($('source').value||'').trim()){showStatus('Cole ou abra o texto original antes de reiniciar a tradução.');return}
+  if(!confirm('Apagar a tradução e os trechos em cache deste capítulo para gerar uma nova versão? O texto original e o capítulo salvo serão mantidos.'))return;
+  $('translated').value='';
+  if(ch){ch.translated='';delete ch.progressive;ch.seriesName=$('seriesName').value.trim();ch.source=$('source').value;ch.preserveTerms=$('preserveTerms').value;ch.translatorEmail=$('translatorEmail').value.trim();ch.scrollTop=0;ch.progress=0;persist()}
+  try{localStorage.removeItem(TRANSLATION_CHECKPOINT_KEY)}catch{}
+  renderReaderText('A tradução será exibida aqui quando você iniciar novamente.');renderListButtons();showStatus('Tradução antiga e trechos em cache removidos. Agora escolha “Traduzir capítulo inteiro” ou “Traduzir conforme leio”.');
+}
+$('translateBtn').addEventListener('click',translateChapter);$('progressiveBtn').addEventListener('click',startProgressiveTranslation);$('resetTranslationBtn').addEventListener('click',resetTranslation);$('saveBtn').addEventListener('click',saveAsChapter);$('saveTranslation').addEventListener('click',()=>{if(current<0){saveAsChapter();return}if(saveCurrent()){renderReaderText($('translated').value||'');showStatus('Capítulo e tradução salvos.')}});$('openReader').addEventListener('click',()=>{if(current<0){saveAsChapter();if(current<0)return}else saveCurrent();updateChapter();setView('reader')});$('addFirst').addEventListener('click',()=>{clearEditor();setView('editor')});$('clearEditor').addEventListener('click',clearEditor);$('backLibrary').addEventListener('click',()=>{if(current>=0)saveCurrent();setView('library')});
+function moveChapter(delta){const next=current+delta;if(next>=0&&next<chapters.length){saveCurrent();current=next;updateChapter();window.scrollTo({top:0,behavior:'smooth'});updateProgress();const ch=currentChapter();if(ch&&ch.progressive&&ch.progressive.active)setTimeout(()=>loadProgressiveBatch(3,true),250)}}$('prev').addEventListener('click',()=>moveChapter(-1));$('prevBottom').addEventListener('click',()=>moveChapter(-1));$('next').addEventListener('click',()=>moveChapter(1));$('nextBottom').addEventListener('click',()=>moveChapter(1));
 $('source').addEventListener('input',()=>$('sourceCount').textContent=$('source').value.length.toLocaleString('pt-BR')+' caracteres');window.addEventListener('scroll',()=>{updateProgress();maybeLoadProgressive();clearTimeout(savePositionTimer);savePositionTimer=setTimeout(()=>{if(current>=0){saveCurrent();updateProgress()}},350)},{passive:true});window.addEventListener('resize',()=>{updateProgress();maybeLoadProgressive()});
 function selectedParagraphInfo(){const selection=window.getSelection();if(!selection||!selection.rangeCount)return null;const range=selection.getRangeAt(0);const node=range.commonAncestorContainer;const element=node.nodeType===Node.ELEMENT_NODE?node:node.parentElement;const paragraph=element&&element.closest?element.closest('#reader p'):null;if(!paragraph)return null;const selected=selection.toString().trim();if(!selected||selected.length>100||selected.includes('\n'))return null;let startOffset=range.startOffset;if(range.startContainer!==paragraph&&range.startContainer.parentElement!==paragraph){try{const prefix=range.cloneRange();prefix.selectNodeContents(paragraph);prefix.setEnd(range.startContainer,range.startOffset);startOffset=prefix.toString().length}catch{startOffset=0}}return {text:selected,index:Number(paragraph.dataset.paragraphIndex)||0,startOffset,paragraph:paragraph.textContent||''}}
 function hideSelectionToolbar(){ $('selectionToolbar').classList.remove('show'); }
