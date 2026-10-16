@@ -1,400 +1,88 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#151923">
 <title>Novel Reader BR</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#111827;color:#f3f4f6;font-family:system-ui,sans-serif;line-height:1.75}
-main{max-width:850px;margin:auto;padding:22px}
-h1{line-height:1.3;color:#c4b5fd}
-.panel{background:#1f2937;padding:18px;border-radius:14px;margin:18px 0}
-label{display:block;margin:12px 0 6px}
-input,textarea,select{
- width:100%;padding:12px;border:1px solid #4b5563;border-radius:8px;
- background:#111827;color:#f3f4f6;font:inherit
-}
-textarea{min-height:220px;resize:vertical}
-button{border:0;border-radius:8px;padding:12px;background:#8b5cf6;
- color:white;font-weight:600;cursor:pointer;margin:5px 4px 5px 0}
-button.secondary{background:#374151}
-button:disabled{opacity:.5;cursor:wait}
-#reader{
- font-family:Georgia,serif;
- font-size:20px;
- line-height:1.9;
- overflow-wrap:anywhere;
- white-space:pre-wrap;
- max-height:70vh;
- overflow-y:auto;
-}
-.muted{color:#9ca3af;font-size:14px}
-.status{color:#a7f3d0;white-space:pre-wrap}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.row button{flex:1}
-hr{border:0;border-top:1px solid #374151;margin:20px 0}
+:root{--bg:#151923;--surface:#202633;--surface2:#293142;--text:#edf0f6;--muted:#a6afc0;--accent:#b6a0ff;--accentText:#171226;--border:#374154;--readerBg:#191e29;--readerText:#e9e6df;--readerWidth:760px;--readerSize:21px;--readerLine:1.85;--paragraphSpace:1.1em;--readerFont:Georgia,serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}button,input,textarea,select{font:inherit}button{cursor:pointer;border:1px solid transparent;border-radius:10px;padding:10px 14px;background:var(--accent);color:var(--accentText);font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:var(--surface2);border-color:var(--border);color:var(--text)}.quiet{background:transparent;border-color:var(--border);color:var(--text)}.danger{background:#512d39;color:#ffe7ec}.topbar{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}.topbar-inner{max-width:1120px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:1.05rem;letter-spacing:-.03em;white-space:nowrap}.brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accentText)}.top-actions{margin-left:auto;display:flex;gap:8px;align-items:center}.nav{display:flex;gap:6px;flex-wrap:wrap}.nav button{padding:8px 11px;font-size:.9rem}.nav .active{background:var(--surface2);border-color:var(--border);color:var(--text)}main{max-width:1120px;margin:auto;padding:26px 20px 70px}.view{display:none}.view.active{display:block}.eyebrow{font-size:.76rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--accent)}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.12;letter-spacing:-.045em;margin:.45rem 0 .75rem}h2{font-size:1.25rem;letter-spacing:-.02em}h3{font-size:1rem}.muted{color:var(--muted)}.hero{padding:26px 0 20px;display:flex;gap:24px;align-items:flex-end;justify-content:space-between}.hero p{max-width:590px;margin-bottom:0;color:var(--muted)}.hero-actions{display:flex;gap:8px;flex-wrap:wrap}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:28px 0 14px}.section-head h2{margin:0}.library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.book-card,.panel{border:1px solid var(--border);background:var(--surface);border-radius:16px;overflow:hidden}.book-card{padding:17px;display:flex;flex-direction:column;min-height:205px}.book-icon{width:42px;height:52px;display:grid;place-items:center;background:linear-gradient(145deg,var(--surface2),var(--bg));border:1px solid var(--border);border-radius:8px;font-size:1.35rem;margin-bottom:14px}.book-card h3{margin:0 0 5px;overflow-wrap:anywhere}.book-card .muted{font-size:.86rem}.card-bottom{margin-top:auto;padding-top:16px;display:flex;gap:8px}.card-bottom button{flex:1;padding:9px 10px;font-size:.88rem}.empty{border:1px dashed var(--border);border-radius:16px;padding:36px 20px;text-align:center;color:var(--muted)}.empty .book-icon{margin:0 auto 14px}.panel{padding:22px;margin-bottom:18px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{min-width:0}.field.full{grid-column:1/-1}label{display:block;font-size:.9rem;font-weight:700;margin:0 0 7px}input,textarea,select{width:100%;padding:11px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;outline:none}input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}textarea{min-height:190px;resize:vertical;line-height:1.6}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.status{white-space:pre-wrap;min-height:1.4em;color:#b9f4d0;font-size:.9rem;margin:12px 0 0}.hint{font-size:.85rem;color:var(--muted);margin:8px 0 0}.reader-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px}.reader-toolbar .spacer{flex:1}.reader-shell{max-width:var(--readerWidth);margin:0 auto}.reader-heading{text-align:center;padding:28px 0 24px;border-bottom:1px solid var(--border);margin-bottom:26px}.reader-heading .muted{font-size:.86rem}.reader-heading h1{font-size:clamp(1.6rem,4vw,2.25rem)}.reader-paper{background:var(--readerBg);color:var(--readerText);border:1px solid var(--border);border-radius:16px;padding:clamp(20px,5vw,54px);font-family:var(--readerFont);font-size:var(--readerSize);line-height:var(--readerLine);overflow-wrap:anywhere;white-space:pre-wrap}.reader-paper p{margin:0 0 var(--paragraphSpace)}.reader-paper p:last-child{margin-bottom:0}.reader-paper:empty:before{content:'Sua tradução aparecerá aqui.';color:var(--muted)}.reader-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 10px}.progress-track{height:4px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:12px 0}.progress-fill{height:100%;width:0;background:var(--accent);transition:width .15s}.settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 20px;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}.setting label{font-size:.8rem}.setting input[type=range]{padding:0;accent-color:var(--accent)}.theme-buttons{display:flex;gap:6px;flex-wrap:wrap}.theme-buttons button{flex:1;padding:8px 10px;font-size:.82rem}.reader-note{text-align:center;font-size:.8rem;color:var(--muted);margin:16px 0}.split-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.split-grid textarea{min-height:270px}.pill{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:99px;padding:4px 9px;color:var(--muted);font-size:.78rem}.mobile-only{display:none}
+body[data-theme="light"]{--bg:#f3f4f7;--surface:#fff;--surface2:#e8ebf1;--text:#242833;--muted:#687083;--border:#d8dce5;--accent:#6c50d9;--accentText:#fff;--readerBg:#fff;--readerText:#292b31}
+body[data-theme="sepia"]{--bg:#e9dfcb;--surface:#f4ead7;--surface2:#e5d7bd;--text:#3e3427;--muted:#786b59;--border:#d4c4a8;--accent:#76522e;--accentText:#fffaf0;--readerBg:#f7edda;--readerText:#45382a}
+body[data-theme="oled"]{--bg:#000;--surface:#0d0d0f;--surface2:#1a1a1e;--text:#f4f4f5;--muted:#a1a1aa;--border:#2a2a30;--readerBg:#000;--readerText:#f0f0f0}
+@media(max-width:720px){.topbar-inner{padding:10px 13px;flex-wrap:wrap}.brand{font-size:1rem}.top-actions{margin-left:auto}.nav{order:3;width:100%}.nav button{flex:1}.top-actions .desktop-label{display:none}main{padding:20px 13px 45px}.hero{display:block;padding-top:10px}.hero-actions{margin-top:16px}.form-grid,.split-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:16px}.settings{grid-template-columns:1fr 1fr;padding:12px}.reader-paper{border-radius:12px;padding:23px 19px}.reader-toolbar .spacer{display:none}.reader-toolbar button{flex:1}.reader-heading{padding-top:14px}.reader-bottom button{flex:1}.library-grid{grid-template-columns:1fr 1fr;gap:10px}.book-card{padding:13px;min-height:200px}.card-bottom{flex-direction:column}.card-bottom button{width:100%}}
+@media(max-width:390px){.library-grid{grid-template-columns:1fr}.settings{grid-template-columns:1fr}.top-actions button{padding:8px 10px}}
 </style>
 </head>
-<body>
+<body data-theme="dark">
+<header class="topbar"><div class="topbar-inner">
+  <div class="brand"><span class="brand-mark">文</span><span>Novel Reader <span style="color:var(--accent)">BR</span></span></div>
+  <nav class="nav" aria-label="Navegação principal">
+    <button class="quiet active" data-view="library">Biblioteca</button>
+    <button class="quiet" data-view="editor">Adicionar capítulo</button>
+    <button class="quiet" data-view="reader">Leitor</button>
+  </nav>
+  <div class="top-actions"><button class="secondary" id="themeQuick" title="Alternar tema">◐ <span class="desktop-label">Tema</span></button></div>
+</div></header>
 <main>
-<h1>📚 Novel Reader BR</h1>
-<p class="muted">Seu espaço gratuito de leitura em português.</p>
-
-<section class="panel">
-<h2>1. Preparar capítulo</h2>
-<label for="chapterTitle">Nome do capítulo</label>
-<input id="chapterTitle" placeholder="Ex.: Chapter 1 — The Beginning">
-
-<label for="chapterUrl">Link original (opcional)</label>
-<input id="chapterUrl" type="url" placeholder="https://www.royalroad.com/...">
-
-<label for="source">Texto original em inglês</label>
-<textarea id="source" placeholder="Cole aqui o texto do capítulo..."></textarea>
-
-<div class="row">
-<button id="translateBtn">Traduzir para PT-BR</button>
-<button id="saveBtn" class="secondary">Salvar capítulo</button>
-</div>
-<p id="status" class="status" role="status"></p>
+<section class="view active" id="libraryView">
+  <div class="hero"><div><div class="eyebrow">Seu espaço de leitura</div><h1>Suas histórias,<br>no seu ritmo.</h1><p>Organize os capítulos, traduza para português e continue lendo de onde parou — em uma interface feita para leitura confortável.</p></div><div class="hero-actions"><button id="addFirst">＋ Adicionar capítulo</button></div></div>
+  <div class="section-head"><h2>Sua biblioteca</h2><span class="pill" id="libraryCount">0 capítulos</span></div>
+  <div class="library-grid" id="libraryGrid"></div>
+  <p class="hint" style="margin-top:20px">Seus textos ficam salvos neste navegador. Limpar os dados do site pode apagá-los; faça cópias de segurança dos textos importantes.</p>
 </section>
-
-<section class="panel">
-<h2>2. Tradução</h2>
-<p class="muted">Instância pública gratuita; pode ficar indisponível ou limitar solicitações.</p>
-<label for="endpoint">Endereço do serviço de tradução</label>
-<input id="endpoint" value="https://translate.terraprint.co/translate">
-<label for="translated">Texto traduzido (você também pode editar)</label>
-<textarea id="translated" placeholder="A tradução aparecerá aqui..."></textarea>
-<button id="saveTranslation" class="secondary">Salvar tradução</button>
+<section class="view" id="editorView">
+  <div class="eyebrow">Importar e traduzir</div><h1>Preparar capítulo</h1><p class="muted">Cole o texto do Royal Road, traduza e salve na sua biblioteca.</p>
+  <section class="panel"><div class="form-grid">
+    <div class="field"><label for="chapterTitle">Nome do capítulo</label><input id="chapterTitle" placeholder="Ex.: Capítulo 12 — A chegada"></div>
+    <div class="field"><label for="chapterUrl">Link original (opcional)</label><input id="chapterUrl" type="url" placeholder="https://www.royalroad.com/..." inputmode="url"></div>
+    <div class="field full"><label for="source">Texto original em inglês</label><textarea id="source" placeholder="Cole aqui o texto do capítulo..." spellcheck="false"></textarea><p class="hint" id="sourceCount">0 caracteres</p></div>
+  </div><div class="actions"><button id="translateBtn">Traduzir para PT-BR</button><button id="saveBtn" class="secondary">Salvar capítulo</button><button id="clearEditor" class="quiet">Limpar campos</button></div><p id="status" class="status" role="status" aria-live="polite"></p></section>
+  <section class="panel"><div class="section-head" style="margin-top:0"><h2>Tradução em português</h2><span class="pill">Editável</span></div><label for="translated">Revise ou corrija o texto traduzido</label><textarea id="translated" placeholder="A tradução aparecerá aqui..." spellcheck="true"></textarea><div class="actions"><button id="saveTranslation" class="secondary">Salvar tradução</button><button id="openReader">Abrir no leitor ↗</button></div><p class="hint">A tradução automática pode cometer erros, principalmente com nomes próprios, expressões e termos de fantasia.</p></section>
 </section>
-
-<section class="panel">
-<div class="row">
-<h2 style="flex:2">3. Leitor</h2>
-<label style="flex:1">Fonte
-<select id="fontSize">
-<option value="18">Pequena</option>
-<option value="20" selected>Média</option>
-<option value="24">Grande</option>
-<option value="28">Extra grande</option>
-</select>
-</label>
-</div>
-<div class="row">
-<button id="prev" class="secondary">← Anterior</button>
-<button id="next" class="secondary">Próximo →</button>
-</div>
-<label for="chapterList">Capítulos salvos</label>
-<select id="chapterList"></select>
-<hr>
-<h2 id="readerTitle">Sua leitura</h2>
-<article id="reader">A tradução do capítulo aparecerá aqui.</article>
-<p class="muted" id="progress">Progresso: 0%</p>
+<section class="view" id="readerView">
+  <div class="reader-toolbar"><button id="backLibrary" class="quiet">← Biblioteca</button><button id="prev" class="secondary">← Anterior</button><button id="next" class="secondary">Próximo →</button><span class="spacer"></span><button id="settingsToggle" class="secondary" aria-expanded="true">Aa Leitura</button></div>
+  <div class="settings" id="settingsPanel">
+    <div class="setting"><label for="fontFamily">Fonte</label><select id="fontFamily"><option value="Georgia,serif">Literária</option><option value="system-ui,sans-serif">Moderna</option><option value="'Palatino Linotype',Palatino,serif">Palatino</option><option value="'Trebuchet MS',sans-serif">Trebuchet</option><option value="'OpenDyslexic',sans-serif">OpenDyslexic*</option></select></div>
+    <div class="setting"><label for="fontSize">Tamanho: <span id="fontSizeValue">21 px</span></label><input id="fontSize" type="range" min="16" max="32" value="21"></div>
+    <div class="setting"><label for="lineHeight">Espaçamento de linha</label><input id="lineHeight" type="range" min="14" max="24" value="19"><span class="hint" id="lineHeightValue">1,9×</span></div>
+    <div class="setting"><label for="readerWidth">Largura do texto</label><input id="readerWidth" type="range" min="520" max="1000" value="760"><span class="hint" id="readerWidthValue">760 px</span></div>
+    <div class="setting"><label for="paragraphSpace">Espaço entre parágrafos</label><input id="paragraphSpace" type="range" min="0" max="24" value="11"><span class="hint" id="paragraphSpaceValue">1,1 em</span></div>
+    <div class="setting"><label>Cor de leitura</label><div class="theme-buttons"><button class="secondary" data-reader-theme="dark">Escuro</button><button class="secondary" data-reader-theme="light">Claro</button><button class="secondary" data-reader-theme="sepia">Sépia</button><button class="secondary" data-reader-theme="oled">OLED</button></div></div>
+  </div>
+  <div class="reader-shell"><div class="reader-heading"><div class="eyebrow">Agora lendo</div><h1 id="readerTitle">Escolha um capítulo</h1><p class="muted" id="readerMeta">Sua leitura traduzida aparecerá aqui.</p></div><article class="reader-paper" id="reader" tabindex="0">Escolha um capítulo na biblioteca para começar a ler.</article><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div><div class="reader-bottom"><button id="prevBottom" class="secondary">← Anterior</button><span class="muted" id="progress">0% lido</span><button id="nextBottom" class="secondary">Próximo →</button></div><p class="reader-note">Sua posição de leitura é salva automaticamente neste navegador.</p></div>
 </section>
-
-<p class="muted">Os capítulos são armazenados localmente neste navegador. Limpar os dados do site pode apagá-los; faça cópias de segurança dos textos importantes.</p>
 </main>
 <script>
-const $ = id => document.getElementById(id);
-const KEY = "novelReaderBR.v2";
-let chapters = [];
-let current = -1;
-let savePositionTimer;
-
-try {
-  chapters = JSON.parse(localStorage.getItem(KEY) || "[]");
-  if (!Array.isArray(chapters)) chapters = [];
-} catch { chapters = []; }
-
-function persist() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(chapters));
-    return true;
-  } catch {
-    $("status").textContent =
-      "Não foi possível salvar. O armazenamento do navegador pode estar cheio.";
-    return false;
-  }
-}
-
-function showStatus(message) {
-  $("status").textContent = message;
-}
-
-function currentChapter() {
-  return current >= 0 ? chapters[current] : null;
-}
-
-function updateChapter() {
-  const chapter = currentChapter();
-  if (!chapter) return;
-
-  $("chapterTitle").value = chapter.title || "";
-  $("chapterUrl").value = chapter.url || "";
-  $("source").value = chapter.source || "";
-  $("translated").value = chapter.translated || "";
-  $("readerTitle").textContent = chapter.title || "Sua leitura";
-  $("reader").textContent =
-    chapter.translated || "Este capítulo ainda não tem tradução.";
-  $("reader").style.fontSize = $("fontSize").value + "px";
-  $("reader").scrollTop = chapter.scrollTop || 0;
-  updateProgress();
-  renderList();
-}
-
-function renderList() {
-  const list = $("chapterList");
-  list.replaceChildren();
-
-  chapters.forEach((chapter, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = chapter.title || "Capítulo " + (index + 1);
-    list.appendChild(option);
-  });
-
-  if (current >= 0) list.value = String(current);
-  $("prev").disabled = current <= 0;
-  $("next").disabled = current < 0 || current >= chapters.length - 1;
-}
-
-function updateProgress() {
-  const chapter = currentChapter();
-  if (!chapter) {
-    $("progress").textContent = "Progresso: 0%";
-    return;
-  }
-  const max = $("reader").scrollHeight - $("reader").clientHeight;
-  const percent = max > 0
-    ? Math.round($("reader").scrollTop / max * 100) : 100;
-  chapter.scrollTop = $("reader").scrollTop;
-  chapter.progress = percent;
-  $("progress").textContent = "Progresso deste capítulo: " + percent + "%";
-}
-
-function saveCurrent() {
-  const chapter = currentChapter();
-  if (!chapter) return false;
-
-  chapter.title = $("chapterTitle").value.trim();
-  chapter.url = $("chapterUrl").value.trim();
-  chapter.source = $("source").value;
-  chapter.translated = $("translated").value;
-  chapter.scrollTop = $("reader").scrollTop;
-  return persist();
-}
-
-function saveAsChapter() {
-  const title = $("chapterTitle").value.trim();
-  const source = $("source").value.trim();
-  const translated = $("translated").value.trim();
-
-  if (!source && !translated) {
-    showStatus("Cole o texto original ou uma tradução primeiro.");
-    return;
-  }
-
-  if (current >= 0) saveCurrent();
-
-  chapters.push({
-    title: title || "Capítulo " + (chapters.length + 1),
-    url: $("chapterUrl").value.trim(),
-    source,
-    translated,
-    scrollTop: 0,
-    progress: 0
-  });
-
-  current = chapters.length - 1;
-  if (persist()) {
-    updateChapter();
-    showStatus("Capítulo salvo neste navegador.");
-  }
-}
-
-function splitText(text, limit = 4500) {
-  const paragraphs = text.split(/\n\s*\n/);
-  const chunks = [];
-  let chunk = "";
-
-  for (const paragraph of paragraphs) {
-    if (paragraph.length > limit) {
-      if (chunk) chunks.push(chunk);
-      chunk = "";
-      for (let i = 0; i < paragraph.length; i += limit) {
-        chunks.push(paragraph.slice(i, i + limit));
-      }
-      continue;
-    }
-    if (chunk && (chunk.length + paragraph.length + 2 > limit)) {
-      chunks.push(chunk);
-      chunk = paragraph;
-    } else {
-      chunk += (chunk ? "\n\n" : "") + paragraph;
-    }
-  }
-  if (chunk) chunks.push(chunk);
-  return chunks;
-}
-
-
-async function translateChapter() {
-  const text = $("source").value.trim();
-
-  if (!text) {
-    showStatus("Cole o texto original antes de traduzir.");
-    return;
-  }
-
-  $("translateBtn").disabled = true;
-
-  try {
-    // MyMemory aceita até 500 bytes por consulta.
-    // Usamos trechos curtos para evitar ultrapassar o limite.
-    const sentences = text.match(/[^.!?]+[.!?]+[\s]*/g) || [text];
-    const chunks = [];
-    let chunk = "";
-
-    for (const sentence of sentences) {
-      if (new TextEncoder().encode(sentence).length > 400) {
-        if (chunk) chunks.push(chunk);
-        chunk = "";
-
-        let part = "";
-        for (const word of sentence.split(/(\s+)/)) {
-          if (new TextEncoder().encode(part + word).length > 400) {
-            if (part) chunks.push(part);
-            part = word;
-          } else {
-            part += word;
-          }
-        }
-        if (part) chunks.push(part);
-      } else if (
-        chunk &&
-        new TextEncoder().encode(chunk + sentence).length > 400
-      ) {
-        chunks.push(chunk);
-        chunk = sentence;
-      } else {
-        chunk += sentence;
-      }
-    }
-
-    if (chunk) chunks.push(chunk);
-
-    const output = [];
-
-    for (let i = 0; i < chunks.length; i++) {
-      showStatus(
-        "Traduzindo trecho " + (i + 1) + " de " + chunks.length + "..."
-      );
-
-      const params = new URLSearchParams({
-        q: chunks[i],
-        langpair: "en|pt-BR",
-        mt: "1"
-      });
-
-      const response = await fetch(
-        "https://api.mymemory.translated.net/get?" + params.toString()
-      );
-
-      if (!response.ok) {
-        throw new Error("Erro HTTP " + response.status);
-      }
-
-      const data = await response.json();
-
-      if (
-        data.responseStatus !== 200 ||
-        !data.responseData ||
-        !data.responseData.translatedText
-      ) {
-        throw new Error(
-          data.responseDetails || "O serviço não retornou uma tradução."
-        );
-      }
-
-      output.push(data.responseData.translatedText);
-
-      // Pequena pausa entre requisições.
-      await new Promise(resolve => setTimeout(resolve, 300));
-    }
-
-    $("translated").value = output.join("");
-    if (current >= 0) saveCurrent();
-
-    showStatus(
-      "Tradução concluída! Revise o texto, pois a qualidade pode variar."
-    );
-  } catch (error) {
-    showStatus(
-      "A tradução falhou: " + error.message +
-      "\nO serviço pode estar indisponível ou ter atingido sua cota."
-    );
-  } finally {
-    $("translateBtn").disabled = false;
-  }
-}
-
-$("translateBtn").addEventListener("click", translateChapter);
-$("saveBtn").addEventListener("click", saveAsChapter);
-
-$("saveTranslation").addEventListener("click", () => {
-  if (current < 0) {
-    showStatus("Salve o capítulo primeiro para guardar a tradução.");
-    return;
-  }
-  if (saveCurrent()) showStatus("Texto e tradução salvos.");
-});
-
-$("chapterList").addEventListener("change", () => {
-  saveCurrent();
-  current = Number($("chapterList").value);
-  updateChapter();
-});
-
-$("prev").addEventListener("click", () => {
-  if (current > 0) {
-    saveCurrent();
-    current--;
-    updateChapter();
-  }
-});
-
-$("next").addEventListener("click", () => {
-  if (current < chapters.length - 1) {
-    saveCurrent();
-    current++;
-    updateChapter();
-  }
-});
-
-$("fontSize").addEventListener("change", () => {
-  $("reader").style.fontSize = $("fontSize").value + "px";
-});
-
-$("reader").addEventListener("scroll", () => {
-  updateProgress();
-  clearTimeout(savePositionTimer);
-  savePositionTimer = setTimeout(() => {
-    if (current >= 0) {
-      saveCurrent();
-      updateProgress();
-    }
-  }, 400);
-});
-
-if (chapters.length) {
-  current = 0;
-  updateChapter();
-} else {
-  renderList();
-}
+const $=id=>document.getElementById(id);const KEY='novelReaderBR.v2';const SETTINGS_KEY='novelReaderBR.settings.v1';let chapters=[];let current=-1;let savePositionTimer;let readerTheme='dark';
+try{chapters=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(chapters))chapters=[]}catch{chapters=[]}
+const defaultSettings={theme:'dark',fontFamily:'Georgia,serif',fontSize:21,lineHeight:19,readerWidth:760,paragraphSpace:11};let settings={...defaultSettings};try{settings={...settings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}}catch{}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(chapters));return true}catch{$('status').textContent='Não foi possível salvar. O armazenamento do navegador pode estar cheio.';return false}}
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings))}catch{}}
+function showStatus(message){$('status').textContent=message}
+function currentChapter(){return current>=0?chapters[current]:null}
+function setView(name){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(name+'View').classList.add('active');document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));if(name==='library')renderLibrary();window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+function renderLibrary(){const grid=$('libraryGrid');grid.replaceChildren();$('libraryCount').textContent=chapters.length+' '+(chapters.length===1?'capítulo':'capítulos');if(!chapters.length){const empty=document.createElement('div');empty.className='empty';empty.style.gridColumn='1/-1';empty.innerHTML='<div class="book-icon">📖</div><h3>Sua biblioteca está vazia</h3><p>Adicione o primeiro capítulo para começar sua coleção.</p><button id="emptyAdd">＋ Adicionar capítulo</button>';grid.appendChild(empty);$('emptyAdd').addEventListener('click',()=>{clearEditor();setView('editor')});return}
+chapters.forEach((ch,i)=>{const card=document.createElement('article');card.className='book-card';const icon=document.createElement('div');icon.className='book-icon';icon.textContent='📘';const title=document.createElement('h3');title.textContent=ch.title||'Capítulo '+(i+1);const info=document.createElement('p');info.className='muted';info.textContent=(ch.translated?'Tradução disponível':'Ainda sem tradução')+' · '+Math.round(ch.progress||0)+'% lido';const bottom=document.createElement('div');bottom.className='card-bottom';const read=document.createElement('button');read.textContent='Continuar lendo';read.addEventListener('click',()=>openChapter(i));const edit=document.createElement('button');edit.className='secondary';edit.textContent='Editar';edit.addEventListener('click',()=>editChapter(i));bottom.append(read,edit);card.append(icon,title,info,bottom);grid.appendChild(card)})}
+function renderListButtons(){const ch=currentChapter();$('prev').disabled=current<=0;$('prevBottom').disabled=current<=0;$('next').disabled=current<0||current>=chapters.length-1;$('nextBottom').disabled=$('next').disabled;$('readerMeta').textContent=ch?(ch.url?'Capítulo salvo · link original disponível':'Capítulo salvo neste navegador'):'Sua leitura traduzida aparecerá aqui.'}
+function updateChapter(){const ch=currentChapter();if(!ch)return;$('chapterTitle').value=ch.title||'';$('chapterUrl').value=ch.url||'';$('source').value=ch.source||'';$('translated').value=ch.translated||'';$('readerTitle').textContent=ch.title||'Capítulo sem título';renderReaderText(ch.translated||'Este capítulo ainda não tem tradução.');$('reader').scrollTop=ch.scrollTop||0;updateProgress();renderListButtons();$('sourceCount').textContent=($('source').value||'').length.toLocaleString('pt-BR')+' caracteres'}
+function renderReaderText(text){const reader=$('reader');reader.replaceChildren();const parts=String(text).split(/\n\s*\n/);parts.forEach((part,i)=>{if(i>0)reader.appendChild(document.createTextNode('\n'));const p=document.createElement('p');p.textContent=part;reader.appendChild(p)})}
+function renderList(){renderListButtons()}
+function updateProgress(){const ch=currentChapter();if(!ch){$('progress').textContent='0% lido';$('progressFill').style.width='0%';return}const max=$('reader').scrollHeight-$('reader').clientHeight;const percent=max>0?Math.round($('reader').scrollTop/max*100):100;ch.scrollTop=$('reader').scrollTop;ch.progress=percent;$('progress').textContent=percent+'% lido';$('progressFill').style.width=percent+'%'}
+function saveCurrent(){const ch=currentChapter();if(!ch)return false;ch.title=$('chapterTitle').value.trim();ch.url=$('chapterUrl').value.trim();ch.source=$('source').value;ch.translated=$('translated').value;ch.scrollTop=$('reader').scrollTop;return persist()}
+function clearEditor(){current=-1;$('chapterTitle').value='';$('chapterUrl').value='';$('source').value='';$('translated').value='';$('sourceCount').textContent='0 caracteres';showStatus('');$('readerTitle').textContent='Escolha um capítulo';renderReaderText('Escolha um capítulo na biblioteca para começar a ler.');renderListButtons()}
+function editChapter(i){if(current>=0)saveCurrent();current=i;updateChapter();showStatus('Capítulo carregado para edição.');setView('editor')}
+function openChapter(i){if(current>=0)saveCurrent();current=i;updateChapter();setView('reader')}
+function saveAsChapter(){const title=$('chapterTitle').value.trim();const source=$('source').value.trim();const translated=$('translated').value.trim();if(!source&&!translated){showStatus('Cole o texto original ou uma tradução primeiro.');return}if(current>=0){saveCurrent();const ch=currentChapter();ch.title=title||ch.title||'Capítulo '+(current+1);ch.url=$('chapterUrl').value.trim();ch.source=$('source').value;ch.translated=$('translated').value;if(persist()){updateChapter();showStatus('Capítulo atualizado e salvo.')}return}chapters.push({title:title||'Capítulo '+(chapters.length+1),url:$('chapterUrl').value.trim(),source,translated,scrollTop:0,progress:0});current=chapters.length-1;if(persist()){updateChapter();showStatus('Capítulo salvo na biblioteca.');$('libraryCount').textContent=chapters.length+' capítulos'}}
+function splitForMyMemory(text,maxBytes=400){const sentences=text.match(/[^.!?]+[.!?]+[\s]*/g)||[text];const chunks=[];let chunk='';for(const sentence of sentences){if(new TextEncoder().encode(sentence).length>maxBytes){if(chunk)chunks.push(chunk);chunk='';let part='';for(const word of sentence.split(/(\s+)/)){if(new TextEncoder().encode(part+word).length>maxBytes&&part){chunks.push(part);part=''}part+=word}if(part)chunks.push(part)}else if(chunk&&new TextEncoder().encode(chunk+sentence).length>maxBytes){chunks.push(chunk);chunk=sentence}else chunk+=sentence}if(chunk)chunks.push(chunk);return chunks}
+async function translateChapter(){const text=$('source').value.trim();if(!text){showStatus('Cole o texto original antes de traduzir.');return}$('translateBtn').disabled=true;try{const chunks=splitForMyMemory(text);const output=[];for(let i=0;i<chunks.length;i++){showStatus('Traduzindo trecho '+(i+1)+' de '+chunks.length+'…');const params=new URLSearchParams({q:chunks[i],langpair:'en|pt-BR',mt:'1'});const response=await fetch('https://api.mymemory.translated.net/get?'+params.toString());if(!response.ok)throw new Error('Erro HTTP '+response.status);const data=await response.json();if(data.responseStatus!==200||!data.responseData||!data.responseData.translatedText)throw new Error(data.responseDetails||'O serviço não retornou uma tradução.');output.push(data.responseData.translatedText);if(i<chunks.length-1)await new Promise(resolve=>setTimeout(resolve,350))}$('translated').value=output.join('');if(current>=0)saveCurrent();showStatus('Tradução concluída! Revise o resultado e salve o capítulo.')}catch(error){showStatus('A tradução falhou: '+error.message+'\nO serviço pode estar indisponível ou ter atingido sua cota.')}finally{$('translateBtn').disabled=false}}
+$('translateBtn').addEventListener('click',translateChapter);$('saveBtn').addEventListener('click',saveAsChapter);$('saveTranslation').addEventListener('click',()=>{if(current<0){saveAsChapter();return}if(saveCurrent()){renderReaderText($('translated').value||'');showStatus('Capítulo e tradução salvos.')}});$('openReader').addEventListener('click',()=>{if(current<0){saveAsChapter();if(current<0)return}else saveCurrent();updateChapter();setView('reader')});$('addFirst').addEventListener('click',()=>{clearEditor();setView('editor')});$('clearEditor').addEventListener('click',clearEditor);$('backLibrary').addEventListener('click',()=>{if(current>=0)saveCurrent();setView('library')});
+function moveChapter(delta){const next=current+delta;if(next>=0&&next<chapters.length){saveCurrent();current=next;updateChapter();$('reader').scrollTop=0;updateProgress()}}$('prev').addEventListener('click',()=>moveChapter(-1));$('prevBottom').addEventListener('click',()=>moveChapter(-1));$('next').addEventListener('click',()=>moveChapter(1));$('nextBottom').addEventListener('click',()=>moveChapter(1));
+$('source').addEventListener('input',()=>$('sourceCount').textContent=$('source').value.length.toLocaleString('pt-BR')+' caracteres');$('reader').addEventListener('scroll',()=>{updateProgress();clearTimeout(savePositionTimer);savePositionTimer=setTimeout(()=>{if(current>=0){saveCurrent();updateProgress()}},350)});
+function applySettings(){document.body.dataset.theme=settings.theme||'dark';document.documentElement.style.setProperty('--readerFont',settings.fontFamily);document.documentElement.style.setProperty('--readerSize',settings.fontSize+'px');document.documentElement.style.setProperty('--readerLine',(settings.lineHeight/10).toFixed(1));document.documentElement.style.setProperty('--readerWidth',settings.readerWidth+'px');document.documentElement.style.setProperty('--paragraphSpace',(settings.paragraphSpace/10)+'em');$('fontFamily').value=settings.fontFamily;$('fontSize').value=settings.fontSize;$('fontSizeValue').textContent=settings.fontSize+' px';$('lineHeight').value=settings.lineHeight;$('lineHeightValue').textContent=(settings.lineHeight/10).toFixed(1).replace('.',',')+'×';$('readerWidth').value=settings.readerWidth;$('readerWidthValue').textContent=settings.readerWidth+' px';$('paragraphSpace').value=settings.paragraphSpace;$('paragraphSpaceValue').textContent=(settings.paragraphSpace/10).toFixed(1).replace('.',',')+' em';saveSettings()}
+$('fontFamily').addEventListener('change',e=>{settings.fontFamily=e.target.value;applySettings()});$('fontSize').addEventListener('input',e=>{settings.fontSize=Number(e.target.value);applySettings()});$('lineHeight').addEventListener('input',e=>{settings.lineHeight=Number(e.target.value);applySettings()});$('readerWidth').addEventListener('input',e=>{settings.readerWidth=Number(e.target.value);applySettings()});$('paragraphSpace').addEventListener('input',e=>{settings.paragraphSpace=Number(e.target.value);applySettings()});document.querySelectorAll('[data-reader-theme]').forEach(b=>b.addEventListener('click',()=>{settings.theme=b.dataset.readerTheme;applySettings()}));$('themeQuick').addEventListener('click',()=>{const order=['dark','light','sepia','oled'];settings.theme=order[(order.indexOf(settings.theme)+1)%order.length];applySettings()});$('settingsToggle').addEventListener('click',()=>{const panel=$('settingsPanel');const hidden=panel.style.display==='none';panel.style.display=hidden?'grid':'none';$('settingsToggle').setAttribute('aria-expanded',String(hidden))});
+applySettings();renderLibrary();if(chapters.length){current=0;updateChapter()}else renderList();
 </script>
-</body>
-</html>
+</body></html>
