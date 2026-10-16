@@ -2,211 +2,345 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111827">
-  <title>Novel Reader BR</title>
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: #111827;
-      color: #f3f4f6;
-      font-family: system-ui, sans-serif;
-      line-height: 1.6;
-    }
-
-    main {
-      width: min(100% - 32px, 680px);
-      margin: 48px auto;
-    }
-
-    h1 { font-size: 2rem; margin-bottom: 4px; }
-    .subtitle { color: #9ca3af; margin-top: 0; }
-
-    .panel {
-      background: #1f2937;
-      padding: 24px;
-      border-radius: 16px;
-      margin-top: 24px;
-    }
-
-    label { display: block; margin-bottom: 8px; }
-
-    input {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #4b5563;
-      border-radius: 10px;
-      background: #111827;
-      color: white;
-      font-size: 16px;
-      margin-bottom: 12px;
-    }
-
-    button {
-      width: 100%;
-      padding: 13px;
-      border: 0;
-      border-radius: 10px;
-      background: #8b5cf6;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    button.secondary {
-      background: #374151;
-      margin-top: 10px;
-    }
-
-    .status { color: #a7f3d0; font-size: 14px; }
-    .muted { color: #9ca3af; font-size: 14px; }
-    footer { margin-top: 32px; color: #9ca3af; font-size: 13px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Novel Reader BR</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111827;color:#f3f4f6;font-family:system-ui,sans-serif;line-height:1.75}
+main{max-width:850px;margin:auto;padding:22px}
+h1{line-height:1.3;color:#c4b5fd}
+.panel{background:#1f2937;padding:18px;border-radius:14px;margin:18px 0}
+label{display:block;margin:12px 0 6px}
+input,textarea,select{
+ width:100%;padding:12px;border:1px solid #4b5563;border-radius:8px;
+ background:#111827;color:#f3f4f6;font:inherit
+}
+textarea{min-height:220px;resize:vertical}
+button{border:0;border-radius:8px;padding:12px;background:#8b5cf6;
+ color:white;font-weight:600;cursor:pointer;margin:5px 4px 5px 0}
+button.secondary{background:#374151}
+button:disabled{opacity:.5;cursor:wait}
+#reader{font-family:Georgia,serif;font-size:20px;line-height:1.9;
+ overflow-wrap:anywhere;white-space:pre-wrap}
+.muted{color:#9ca3af;font-size:14px}
+.status{color:#a7f3d0;white-space:pre-wrap}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row button{flex:1}
+hr{border:0;border-top:1px solid #374151;margin:20px 0}
+</style>
 </head>
 <body>
-  <main>
-    <h1>📚 Novel Reader BR</h1>
-    <p class="subtitle">Suas novels favoritas, rumo ao português.</p>
+<main>
+<h1>📚 Novel Reader BR</h1>
+<p class="muted">Seu espaço gratuito de leitura em português.</p>
 
-    <section class="panel">
-      <h2>Adicionar novel</h2>
-      <label for="novelUrl">Link da novel ou do capítulo no Royal Road</label>
-      <input
-        id="novelUrl"
-        type="url"
-        placeholder="https://www.royalroad.com/fiction/..."
-      >
-      <button id="saveBtn">Salvar minha novel</button>
-      <button id="openBtn" class="secondary">Abrir capítulo no Royal Road</button>
-      <p id="status" class="status" role="status"></p>
-    </section>
+<section class="panel">
+<h2>1. Preparar capítulo</h2>
+<label for="chapterTitle">Nome do capítulo</label>
+<input id="chapterTitle" placeholder="Ex.: Chapter 1 — The Beginning">
 
-    <section class="panel">
-      <h2>Minha biblioteca</h2>
-      <div id="library">
-        <p class="muted">Sua biblioteca aparecerá aqui.</p>
-      </div>
-    </section>
+<label for="chapterUrl">Link original (opcional)</label>
+<input id="chapterUrl" type="url" placeholder="https://www.royalroad.com/...">
 
-    <section class="panel">
-      <h2>Próximas funções</h2>
-      <p>✓ Interface adaptada para celular</p>
-      <p>✓ Salvar links neste navegador</p>
-      <p>○ Leitura dentro do próprio leitor</p>
-      <p>○ Tradução automática para PT-BR</p>
-      <p>○ Navegação entre capítulos</p>
-    </section>
+<label for="source">Texto original em inglês</label>
+<textarea id="source" placeholder="Cole aqui o texto do capítulo..."></textarea>
 
-    <footer>
-      Projeto gratuito e em desenvolvimento.
-      Os links ficam salvos neste navegador.
-    </footer>
-  </main>
+<div class="row">
+<button id="translateBtn">Traduzir para PT-BR</button>
+<button id="saveBtn" class="secondary">Salvar capítulo</button>
+</div>
+<p id="status" class="status" role="status"></p>
+</section>
 
-  <script>
-    const input = document.getElementById("novelUrl");
-    const status = document.getElementById("status");
-    const library = document.getElementById("library");
+<section class="panel">
+<h2>2. Tradução</h2>
+<p class="muted">Instância pública gratuita; pode ficar indisponível ou limitar solicitações.</p>
+<label for="endpoint">Endereço do serviço de tradução</label>
+<input id="endpoint" value="https://translate.terraprint.co/translate">
+<label for="translated">Texto traduzido (você também pode editar)</label>
+<textarea id="translated" placeholder="A tradução aparecerá aqui..."></textarea>
+<button id="saveTranslation" class="secondary">Salvar tradução</button>
+</section>
 
-    let novels = [];
+<section class="panel">
+<div class="row">
+<h2 style="flex:2">3. Leitor</h2>
+<label style="flex:1">Fonte
+<select id="fontSize">
+<option value="18">Pequena</option>
+<option value="20" selected>Média</option>
+<option value="24">Grande</option>
+<option value="28">Extra grande</option>
+</select>
+</label>
+</div>
+<div class="row">
+<button id="prev" class="secondary">← Anterior</button>
+<button id="next" class="secondary">Próximo →</button>
+</div>
+<label for="chapterList">Capítulos salvos</label>
+<select id="chapterList"></select>
+<hr>
+<h2 id="readerTitle">Sua leitura</h2>
+<article id="reader">A tradução do capítulo aparecerá aqui.</article>
+<p class="muted" id="progress">Progresso: 0%</p>
+</section>
 
-    try {
-      novels = JSON.parse(
-        localStorage.getItem("novelReaderLibrary") || "[]"
-      );
-      if (!Array.isArray(novels)) novels = [];
-    } catch {
-      novels = [];
-    }
+<p class="muted">Os capítulos são armazenados localmente neste navegador. Limpar os dados do site pode apagá-los; faça cópias de segurança dos textos importantes.</p>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = "novelReaderBR.v2";
+let chapters = [];
+let current = -1;
+let savePositionTimer;
 
-    function validUrl(value) {
-      try {
-        const url = new URL(value);
-        return url.protocol === "https:" &&
-          url.hostname === "www.royalroad.com";
-      } catch {
-        return false;
+try {
+  chapters = JSON.parse(localStorage.getItem(KEY) || "[]");
+  if (!Array.isArray(chapters)) chapters = [];
+} catch { chapters = []; }
+
+function persist() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(chapters));
+    return true;
+  } catch {
+    $("status").textContent =
+      "Não foi possível salvar. O armazenamento do navegador pode estar cheio.";
+    return false;
+  }
+}
+
+function showStatus(message) {
+  $("status").textContent = message;
+}
+
+function currentChapter() {
+  return current >= 0 ? chapters[current] : null;
+}
+
+function updateChapter() {
+  const chapter = currentChapter();
+  if (!chapter) return;
+
+  $("chapterTitle").value = chapter.title || "";
+  $("chapterUrl").value = chapter.url || "";
+  $("source").value = chapter.source || "";
+  $("translated").value = chapter.translated || "";
+  $("readerTitle").textContent = chapter.title || "Sua leitura";
+  $("reader").textContent =
+    chapter.translated || "Este capítulo ainda não tem tradução.";
+  $("reader").style.fontSize = $("fontSize").value + "px";
+  $("reader").scrollTop = chapter.scrollTop || 0;
+  updateProgress();
+  renderList();
+}
+
+function renderList() {
+  const list = $("chapterList");
+  list.replaceChildren();
+
+  chapters.forEach((chapter, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = chapter.title || "Capítulo " + (index + 1);
+    list.appendChild(option);
+  });
+
+  if (current >= 0) list.value = String(current);
+  $("prev").disabled = current <= 0;
+  $("next").disabled = current < 0 || current >= chapters.length - 1;
+}
+
+function updateProgress() {
+  const chapter = currentChapter();
+  if (!chapter) {
+    $("progress").textContent = "Progresso: 0%";
+    return;
+  }
+  const max = $("reader").scrollHeight - $("reader").clientHeight;
+  const percent = max > 0
+    ? Math.round($("reader").scrollTop / max * 100) : 100;
+  chapter.scrollTop = $("reader").scrollTop;
+  chapter.progress = percent;
+  $("progress").textContent = "Progresso deste capítulo: " + percent + "%";
+}
+
+function saveCurrent() {
+  const chapter = currentChapter();
+  if (!chapter) return false;
+
+  chapter.title = $("chapterTitle").value.trim();
+  chapter.url = $("chapterUrl").value.trim();
+  chapter.source = $("source").value;
+  chapter.translated = $("translated").value;
+  chapter.scrollTop = $("reader").scrollTop;
+  return persist();
+}
+
+function saveAsChapter() {
+  const title = $("chapterTitle").value.trim();
+  const source = $("source").value.trim();
+  const translated = $("translated").value.trim();
+
+  if (!source && !translated) {
+    showStatus("Cole o texto original ou uma tradução primeiro.");
+    return;
+  }
+
+  if (current >= 0) saveCurrent();
+
+  chapters.push({
+    title: title || "Capítulo " + (chapters.length + 1),
+    url: $("chapterUrl").value.trim(),
+    source,
+    translated,
+    scrollTop: 0,
+    progress: 0
+  });
+
+  current = chapters.length - 1;
+  if (persist()) {
+    updateChapter();
+    showStatus("Capítulo salvo neste navegador.");
+  }
+}
+
+function splitText(text, limit = 4500) {
+  const paragraphs = text.split(/\n\s*\n/);
+  const chunks = [];
+  let chunk = "";
+
+  for (const paragraph of paragraphs) {
+    if (paragraph.length > limit) {
+      if (chunk) chunks.push(chunk);
+      chunk = "";
+      for (let i = 0; i < paragraph.length; i += limit) {
+        chunks.push(paragraph.slice(i, i + limit));
       }
+      continue;
     }
+    if (chunk && (chunk.length + paragraph.length + 2 > limit)) {
+      chunks.push(chunk);
+      chunk = paragraph;
+    } else {
+      chunk += (chunk ? "\n\n" : "") + paragraph;
+    }
+  }
+  if (chunk) chunks.push(chunk);
+  return chunks;
+}
 
-    function renderLibrary() {
-      library.replaceChildren();
+async function translateChapter() {
+  const text = $("source").value.trim();
+  const endpoint = $("endpoint").value.trim();
 
-      if (novels.length === 0) {
-        const p = document.createElement("p");
-        p.className = "muted";
-        p.textContent = "Sua biblioteca está vazia.";
-        library.appendChild(p);
-        return;
-      }
+  if (!text) {
+    showStatus("Cole o texto original antes de traduzir.");
+    return;
+  }
+  if (!endpoint.startsWith("https://")) {
+    showStatus("Use um endereço HTTPS seguro para o serviço.");
+    return;
+  }
 
-      novels.forEach((novel, index) => {
-        const item = document.createElement("div");
-        item.style.marginBottom = "18px";
+  $("translateBtn").disabled = true;
+  let output = [];
 
-        const link = document.createElement("a");
-        link.href = novel.url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        link.textContent = novel.url;
-        link.style.color = "#c4b5fd";
-        link.style.overflowWrap = "anywhere";
-
-        const remove = document.createElement("button");
-        remove.className = "secondary";
-        remove.textContent = "Remover";
-        remove.onclick = () => {
-          novels.splice(index, 1);
-          persist();
-          renderLibrary();
-        };
-
-        item.append(link, remove);
-        library.appendChild(item);
+  try {
+    const chunks = splitText(text);
+    for (let i = 0; i < chunks.length; i++) {
+      showStatus("Traduzindo trecho " + (i + 1) + " de " + chunks.length + "...");
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          q: chunks[i],
+          source: "en",
+          target: "pt",
+          format: "text"
+        })
       });
+
+      if (!response.ok) {
+        throw new Error("O serviço respondeu HTTP " + response.status);
+      }
+
+      const data = await response.json();
+      if (!data.translatedText) throw new Error("Resposta sem tradução.");
+      output.push(data.translatedText);
     }
 
-    function persist() {
-      localStorage.setItem(
-        "novelReaderLibrary",
-        JSON.stringify(novels)
-      );
+    $("translated").value = output.join("\n\n");
+    if (current >= 0) saveCurrent();
+    showStatus("Tradução concluída. Confira o resultado antes de ler.");
+  } catch (error) {
+    showStatus(
+      "Não foi possível traduzir: " + error.message +
+      "\nA instância pode estar indisponível, exigir chave ou bloquear o navegador. " +
+      "Tente outro serviço público compatível no campo de endereço."
+    );
+  } finally {
+    $("translateBtn").disabled = false;
+  }
+}
+
+$("translateBtn").addEventListener("click", translateChapter);
+$("saveBtn").addEventListener("click", saveAsChapter);
+
+$("saveTranslation").addEventListener("click", () => {
+  if (current < 0) {
+    showStatus("Salve o capítulo primeiro para guardar a tradução.");
+    return;
+  }
+  if (saveCurrent()) showStatus("Texto e tradução salvos.");
+});
+
+$("chapterList").addEventListener("change", () => {
+  saveCurrent();
+  current = Number($("chapterList").value);
+  updateChapter();
+});
+
+$("prev").addEventListener("click", () => {
+  if (current > 0) {
+    saveCurrent();
+    current--;
+    updateChapter();
+  }
+});
+
+$("next").addEventListener("click", () => {
+  if (current < chapters.length - 1) {
+    saveCurrent();
+    current++;
+    updateChapter();
+  }
+});
+
+$("fontSize").addEventListener("change", () => {
+  $("reader").style.fontSize = $("fontSize").value + "px";
+});
+
+$("reader").addEventListener("scroll", () => {
+  updateProgress();
+  clearTimeout(savePositionTimer);
+  savePositionTimer = setTimeout(() => {
+    if (current >= 0) {
+      saveCurrent();
+      updateProgress();
     }
+  }, 400);
+});
 
-    document.getElementById("saveBtn").onclick = () => {
-      const url = input.value.trim();
-
-      if (!validUrl(url)) {
-        status.textContent =
-          "Insira um link HTTPS válido do www.royalroad.com.";
-        return;
-      }
-
-      if (!novels.some(novel => novel.url === url)) {
-        novels.push({ url });
-        persist();
-        renderLibrary();
-      }
-
-      status.textContent = "Link salvo neste navegador!";
-    };
-
-    document.getElementById("openBtn").onclick = () => {
-      const url = input.value.trim();
-
-      if (!validUrl(url)) {
-        status.textContent = "Insira um link válido do Royal Road.";
-        return;
-      }
-
-      window.open(url, "_blank", "noopener,noreferrer");
-    };
-
-    renderLibrary();
-  </script>
+if (chapters.length) {
+  current = 0;
+  updateChapter();
+} else {
+  renderList();
+}
+</script>
 </body>
 </html>
